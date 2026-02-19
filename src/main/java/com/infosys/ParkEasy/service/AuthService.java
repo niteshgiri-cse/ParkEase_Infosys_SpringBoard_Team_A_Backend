@@ -1,0 +1,81 @@
+package com.infosys.ParkEasy.service;
+
+import com.infosys.ParkEasy.config.AuthUtil;
+import com.infosys.ParkEasy.dto.Reponse.LoginResponseDto;
+import com.infosys.ParkEasy.dto.Reponse.SignUpResponseDto;
+import com.infosys.ParkEasy.dto.Request.LoginRequestDto;
+import com.infosys.ParkEasy.dto.Request.SignUpRequestDto;
+import com.infosys.ParkEasy.model.User;
+import com.infosys.ParkEasy.model.type.RoleType;
+import com.infosys.ParkEasy.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthUtil authUtil;
+    private final AuthenticationManager authenticationManager;
+
+    private String generateCustomId() {
+        return "CUST-" + UUID.randomUUID()
+                .toString()
+                .substring(0, 8)
+                .toUpperCase();
+    }
+
+    public SignUpResponseDto signup(SignUpRequestDto signUpRequestDto) {
+
+        Optional<User> existUser = userRepository.findByEmail(signUpRequestDto.getEmail());
+        if (existUser.isPresent()) {
+            throw new IllegalArgumentException("User already exist");
+        }
+
+        User user = new User();
+        user.setName(signUpRequestDto.getName());
+        user.setEmail(signUpRequestDto.getEmail());
+        user.setPassword(passwordEncoder.encode(signUpRequestDto.getPassword()));
+        user.setPhone(signUpRequestDto.getPhone());
+        user.setCustomId(generateCustomId());
+        user.setRoleTypes(Collections.singleton(RoleType.USER));
+
+        User savedUser = userRepository.save(user);
+
+        String token = authUtil.generateTokenByEmail(savedUser);
+
+        return new SignUpResponseDto(
+                savedUser.getId(),
+                savedUser.getName(),
+                token
+        );
+    }
+
+    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequestDto.getEmail(),
+                        loginRequestDto.getPassword()
+                )
+        );
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        String token = authUtil.generateTokenByEmail(user);
+        return new LoginResponseDto(
+                user.getId(),
+                token
+        );
+    }
+}
