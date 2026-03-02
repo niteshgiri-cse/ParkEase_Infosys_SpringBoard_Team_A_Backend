@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -48,7 +49,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(signUpRequestDto.getPassword()));
         user.setPhone(signUpRequestDto.getPhone());
         user.setCustomId(generateCustomId());
-        user.setRoleTypes(Collections.singleton(RoleType.USER));
+        user.setRoleTypes(Set.of(RoleType.USER));
 
         User savedUser = userRepository.save(user);
 

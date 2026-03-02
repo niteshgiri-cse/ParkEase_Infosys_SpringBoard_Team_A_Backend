@@ -12,30 +12,36 @@ import java.util.Date;
 
 @Component
 public class AuthUtil {
-        @Value("${jwt.SecretKey}")
-        private String jwtSecretKey;
 
-        private SecretKey getSecretKey(){
-            return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
-        }
+    @Value("${jwt.SecretKey}")
+    private String jwtSecretKey;
 
-        public String generateTokenByEmail(User user){
-           return Jwts.builder()
-                    .subject(user.getEmail())
-                    .claim("roles", user.getRoleTypes())
-                    .signWith(getSecretKey())
-                    .issuedAt(new Date())
-                    .expiration(new Date(System.currentTimeMillis() +1000*60*30))
-                    .compact();
-        }
+    private SecretKey getSecretKey(){
+        return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
+    }
 
-        public String getEmailFormToken(String token){
-            return Jwts.parser()
-                    .verifyWith(getSecretKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload().getSubject();
+    public String generateTokenByEmail(User user){
+        return Jwts.builder()
+                .subject(user.getEmail())
+                .claim(
+                        "roles",
+                        user.getRoleTypes()
+                                .stream()
+                                .map(Enum::name)
+                                .toList()
+                )
+                .signWith(getSecretKey())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+                .compact();
+    }
 
-        }
-
+    public String getEmailFormToken(String token){
+        return Jwts.parser()
+                .verifyWith(getSecretKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
 }
