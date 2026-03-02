@@ -1,6 +1,6 @@
-package com.infosys.ParkEasy.model;
+package com.infosys.ParkEasy.entity;
 
-import com.infosys.ParkEasy.model.type.RoleType;
+import com.infosys.ParkEasy.entity.type.RoleType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

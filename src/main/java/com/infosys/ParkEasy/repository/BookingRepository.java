@@ -1,6 +1,6 @@
 package com.infosys.ParkEasy.repository;
 
-import com.infosys.ParkEasy.model.Booking;
+import com.infosys.ParkEasy.entity.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

@@ -1,4 +1,4 @@
-package com.infosys.ParkEasy.model;
+package com.infosys.ParkEasy.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

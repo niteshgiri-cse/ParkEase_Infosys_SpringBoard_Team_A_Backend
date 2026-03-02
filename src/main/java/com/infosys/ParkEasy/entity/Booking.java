@@ -1,6 +1,6 @@
-package com.infosys.ParkEasy.model;
+package com.infosys.ParkEasy.entity;
 
-import com.infosys.ParkEasy.model.type.BookingStatus;
+import com.infosys.ParkEasy.entity.type.BookingStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

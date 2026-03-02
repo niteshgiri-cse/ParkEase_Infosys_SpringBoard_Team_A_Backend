@@ -1,6 +1,6 @@
 package com.infosys.ParkEasy.config;
 
-import com.infosys.ParkEasy.model.User;
+import com.infosys.ParkEasy.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;

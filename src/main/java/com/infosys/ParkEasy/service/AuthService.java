@@ -5,8 +5,8 @@ import com.infosys.ParkEasy.dto.Reponse.LoginResponseDto;
 import com.infosys.ParkEasy.dto.Reponse.SignUpResponseDto;
 import com.infosys.ParkEasy.dto.Request.LoginRequestDto;
 import com.infosys.ParkEasy.dto.Request.SignUpRequestDto;
-import com.infosys.ParkEasy.model.User;
-import com.infosys.ParkEasy.model.type.RoleType;
+import com.infosys.ParkEasy.entity.User;
+import com.infosys.ParkEasy.entity.type.RoleType;
 import com.infosys.ParkEasy.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;

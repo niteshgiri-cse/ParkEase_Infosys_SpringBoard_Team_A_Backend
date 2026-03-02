@@ -1,6 +1,6 @@
 package com.infosys.ParkEasy.service;
 
-import com.infosys.ParkEasy.model.User;
+import com.infosys.ParkEasy.entity.User;
 import com.infosys.ParkEasy.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,9 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
-    @Service
+@Service
     @RequiredArgsConstructor
     public class CustomUserDetailsService implements UserDetailsService {
 

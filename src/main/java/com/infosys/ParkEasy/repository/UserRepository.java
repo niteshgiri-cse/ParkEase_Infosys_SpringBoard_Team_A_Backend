@@ -1,6 +1,6 @@
 package com.infosys.ParkEasy.repository;
 
-import com.infosys.ParkEasy.model.User;
+import com.infosys.ParkEasy.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.jpa.repository.JpaRepository;
