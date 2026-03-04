@@ -1,4 +1,4 @@
-package com.infosys.ParkEasy.service;
+package com.infosys.ParkEasy.service.imp;
 
 import com.infosys.ParkEasy.config.AuthUtil;
 import com.infosys.ParkEasy.dto.Reponse.LoginResponseDto;
@@ -8,6 +8,7 @@ import com.infosys.ParkEasy.dto.Request.SignUpRequestDto;
 import com.infosys.ParkEasy.entity.User;
 import com.infosys.ParkEasy.entity.type.RoleType;
 import com.infosys.ParkEasy.repository.UserRepository;
+import com.infosys.ParkEasy.service.Interface.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +22,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class AuthService {
+public class AuthServiceImp implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -34,7 +35,7 @@ public class AuthService {
                 .substring(0, 8)
                 .toUpperCase();
     }
-
+    @Override
     public SignUpResponseDto signup(SignUpRequestDto signUpRequestDto) {
 
         Optional<User> existUser = userRepository.findByEmail(signUpRequestDto.getEmail());
@@ -60,7 +61,7 @@ public class AuthService {
                 token
         );
     }
-
+    @Override
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
 
         Authentication authentication = authenticationManager.authenticate(

@@ -4,7 +4,7 @@ import com.infosys.ParkEasy.dto.Reponse.LoginResponseDto;
 import com.infosys.ParkEasy.dto.Reponse.SignUpResponseDto;
 import com.infosys.ParkEasy.dto.Request.LoginRequestDto;
 import com.infosys.ParkEasy.dto.Request.SignUpRequestDto;
-import com.infosys.ParkEasy.service.AuthService;
+import com.infosys.ParkEasy.service.Interface.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

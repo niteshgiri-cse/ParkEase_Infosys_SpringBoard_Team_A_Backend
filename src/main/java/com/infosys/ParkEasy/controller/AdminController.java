@@ -3,7 +3,8 @@ package com.infosys.ParkEasy.controller;
 import com.infosys.ParkEasy.dto.ChartResponseDto;
 import com.infosys.ParkEasy.dto.DashboardStatsDto;
 import com.infosys.ParkEasy.entity.Parking;
-import com.infosys.ParkEasy.service.AdminService;
+
+import com.infosys.ParkEasy.service.Interface.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

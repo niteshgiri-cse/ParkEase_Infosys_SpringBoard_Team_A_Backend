@@ -33,7 +33,7 @@ public class User {
     @Column(unique = true)
     private String phone;
 
-    @Column(name = "full_name", nullable = false)
+    @Column(name = "full_name", nullable =false)
     private String name;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -47,4 +47,7 @@ public class User {
 
     private Double walletBalance = 0.0;
     private Integer loyaltyPoints = 0;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
+    private Set<Address> addresses=new HashSet<>();
 }

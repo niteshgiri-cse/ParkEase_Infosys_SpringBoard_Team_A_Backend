@@ -6,6 +6,7 @@ import com.infosys.ParkEasy.entity.Floor;
 import com.infosys.ParkEasy.entity.NormalSlot;
 import com.infosys.ParkEasy.entity.Parking;
 import com.infosys.ParkEasy.repository.*;
+import com.infosys.ParkEasy.service.Interface.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +14,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AdminService {
+public class AdminServiceImp implements AdminService {
 
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final ParkingRepository parkingRepository;
     private final SlotRepository slotRepository;
-
+    @Override
     public DashboardStatsDto getDashboardStats() {
 
         long totalUsers = userRepository.count();
@@ -39,7 +40,7 @@ public class AdminService {
                 revenue
         );
     }
-
+    @Override
     public ChartResponseDto getBookingChart() {
         List<Object[]> result = bookingRepository.getYearlyBookings();
         List<String> years = result.stream()
@@ -52,7 +53,7 @@ public class AdminService {
                 new ChartResponseDto.Series("Actual Bookings", data);
         return new ChartResponseDto(List.of(series), years);
     }
-
+    @Override
     public Parking createParking(Parking parking){
         if(parking.getNormalSlot()!=null){
             parking.getNormalSlot().setParking(parking);
@@ -62,7 +63,7 @@ public class AdminService {
         }
         return parkingRepository.save(parking);
     }
-
+    @Override
     public Parking updateParking(Long id,Parking parking){
         Parking existing=parkingRepository.findById(id).orElseThrow();
         existing.setParkingName(parking.getParkingName());
@@ -93,27 +94,27 @@ public class AdminService {
 
         return parkingRepository.save(existing);
     }
-
+    @Override
     public void deleteParking(Long id){
         parkingRepository.deleteById(id);
     }
-
+    @Override
     public List<Parking> getAllParkings(){
         return parkingRepository.findAll();
     }
-
+    @Override
     public Parking getParkingById(Long id){
         return parkingRepository.findById(id).orElseThrow();
     }
-
+    @Override
     public Long totalSlots(){
         return parkingRepository.getTotalSlots();
     }
-
+    @Override
     public Long availableSlots(){
         return parkingRepository.getAvailableSlots();
     }
-
+    @Override
     public Long bookedSlots(){
         return parkingRepository.getBookedSlots();
     }
