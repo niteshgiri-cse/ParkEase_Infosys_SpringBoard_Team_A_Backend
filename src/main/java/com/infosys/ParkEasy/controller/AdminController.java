@@ -1,7 +1,7 @@
 package com.infosys.ParkEasy.controller;
 
-import com.infosys.ParkEasy.dto.ChartResponseDto;
-import com.infosys.ParkEasy.dto.DashboardStatsDto;
+import com.infosys.ParkEasy.dto.Reponse.ChartResponseDto;
+import com.infosys.ParkEasy.dto.Reponse.DashboardStatsResponseDto;
 import com.infosys.ParkEasy.entity.Parking;
 
 import com.infosys.ParkEasy.service.Interface.AdminService;
@@ -21,7 +21,7 @@ public class AdminController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/stats")
-    public ResponseEntity<DashboardStatsDto> getDashboardStats() {
+    public ResponseEntity<DashboardStatsResponseDto> getDashboardStats() {
         return ResponseEntity.ok(adminService.getDashboardStats());
     }
     @PreAuthorize("hasRole('ADMIN')")

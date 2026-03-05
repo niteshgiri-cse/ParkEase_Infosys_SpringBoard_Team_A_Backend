@@ -1,9 +1,9 @@
-package com.infosys.ParkEasy.dto;
+package com.infosys.ParkEasy.dto.Reponse;
 
 import lombok.Data;
 
 @Data
-public class FloorDto {
+public class FloorResponseDto {
     private String floorName;
     private String prefix;
     private Integer total;

@@ -1,4 +1,4 @@
-package com.infosys.ParkEasy.dto;
+package com.infosys.ParkEasy.dto.Reponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

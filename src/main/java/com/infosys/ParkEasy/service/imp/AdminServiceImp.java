@@ -1,7 +1,7 @@
 package com.infosys.ParkEasy.service;
 
-import com.infosys.ParkEasy.dto.ChartResponseDto;
-import com.infosys.ParkEasy.dto.DashboardStatsDto;
+import com.infosys.ParkEasy.dto.Reponse.ChartResponseDto;
+import com.infosys.ParkEasy.dto.Reponse.DashboardStatsResponseDto;
 import com.infosys.ParkEasy.entity.Floor;
 import com.infosys.ParkEasy.entity.NormalSlot;
 import com.infosys.ParkEasy.entity.Parking;
@@ -21,7 +21,7 @@ public class AdminServiceImp implements AdminService {
     private final ParkingRepository parkingRepository;
     private final SlotRepository slotRepository;
     @Override
-    public DashboardStatsDto getDashboardStats() {
+    public DashboardStatsResponseDto getDashboardStats() {
 
         long totalUsers = userRepository.count();
         long totalBookings = bookingRepository.getTotalConfirmedBookings();
@@ -30,7 +30,7 @@ public class AdminServiceImp implements AdminService {
         long bookedSlots = slotRepository.countByBookedTrue();
         long availableSlots = slotRepository.countByBookedFalse();
         double revenue = bookingRepository.getTotalRevenue();
-        return new DashboardStatsDto(
+        return new DashboardStatsResponseDto(
                 totalLocations,
                 totalSlots,
                 availableSlots,

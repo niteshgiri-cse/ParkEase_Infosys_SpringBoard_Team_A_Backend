@@ -1,14 +1,14 @@
 package com.infosys.ParkEasy.service.Interface;
 
-import com.infosys.ParkEasy.dto.ChartResponseDto;
-import com.infosys.ParkEasy.dto.DashboardStatsDto;
+import com.infosys.ParkEasy.dto.Reponse.ChartResponseDto;
+import com.infosys.ParkEasy.dto.Reponse.DashboardStatsResponseDto;
 import com.infosys.ParkEasy.entity.Parking;
 
 import java.util.List;
 
 public interface AdminService {
 
-    DashboardStatsDto getDashboardStats();
+    DashboardStatsResponseDto getDashboardStats();
     ChartResponseDto getBookingChart();
     Parking createParking(Parking parking);
     Parking updateParking(Long id,Parking parking);

@@ -1,5 +1,7 @@
-package com.infosys.ParkEasy.dto;
+package com.infosys.ParkEasy.dto.Request;
 
+import com.infosys.ParkEasy.dto.Reponse.FloorResponseDto;
+import com.infosys.ParkEasy.dto.Reponse.NormalSlotResponseDto;
 import com.infosys.ParkEasy.entity.type.ParkingType;
 import lombok.Data;
 
@@ -23,7 +25,7 @@ public class ParkingRequestDto {
 
     private ParkingType parkingType;
 
-    private NormalSlotDto normalSlots;
+    private NormalSlotResponseDto normalSlots;
 
-    private List<FloorDto> floors;
+    private List<FloorResponseDto> floors;
 }
