@@ -1,13 +1,17 @@
-package com.infosys.ParkEasy.service;
+package com.infosys.ParkEasy.service.imp;
 
 import com.infosys.ParkEasy.dto.Reponse.ChartResponseDto;
 import com.infosys.ParkEasy.dto.Reponse.DashboardStatsResponseDto;
+import com.infosys.ParkEasy.dto.Reponse.UserProfileResponseDto;
 import com.infosys.ParkEasy.entity.Floor;
 import com.infosys.ParkEasy.entity.NormalSlot;
 import com.infosys.ParkEasy.entity.Parking;
+import com.infosys.ParkEasy.entity.User;
 import com.infosys.ParkEasy.repository.*;
 import com.infosys.ParkEasy.service.Interface.AdminService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +24,7 @@ public class AdminServiceImp implements AdminService {
     private final BookingRepository bookingRepository;
     private final ParkingRepository parkingRepository;
     private final SlotRepository slotRepository;
+    private final ModelMapper modelMapper;
     @Override
     public DashboardStatsResponseDto getDashboardStats() {
 
@@ -117,5 +122,11 @@ public class AdminServiceImp implements AdminService {
     @Override
     public Long bookedSlots(){
         return parkingRepository.getBookedSlots();
+    }
+    @Override
+    public UserProfileResponseDto getUserDetails(String customId) {
+       User user=userRepository.findByCustomId(customId).orElseThrow(()->new UsernameNotFoundException("User Not " +
+               "Exist"));
+        return modelMapper.map(user,UserProfileResponseDto.class);
     }
 }

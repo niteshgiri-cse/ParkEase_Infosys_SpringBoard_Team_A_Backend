@@ -11,4 +11,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
 
     Optional<User> findByEmail(@NotBlank(message = "Email is required") @Email(message = "Invalid email format") String email);
+
+    Optional<User> findByCustomId(String customerId);
 }

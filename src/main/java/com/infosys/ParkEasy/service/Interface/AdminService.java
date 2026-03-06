@@ -2,6 +2,7 @@ package com.infosys.ParkEasy.service.Interface;
 
 import com.infosys.ParkEasy.dto.Reponse.ChartResponseDto;
 import com.infosys.ParkEasy.dto.Reponse.DashboardStatsResponseDto;
+import com.infosys.ParkEasy.dto.Reponse.UserProfileResponseDto;
 import com.infosys.ParkEasy.entity.Parking;
 
 import java.util.List;
@@ -18,4 +19,6 @@ public interface AdminService {
     Long totalSlots();
     Long availableSlots();
     Long bookedSlots();
+
+    UserProfileResponseDto getUserDetails(String customId);
 }

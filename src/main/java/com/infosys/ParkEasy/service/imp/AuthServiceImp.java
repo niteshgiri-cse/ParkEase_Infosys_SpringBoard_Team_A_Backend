@@ -7,9 +7,11 @@ import com.infosys.ParkEasy.dto.Request.LoginRequestDto;
 import com.infosys.ParkEasy.dto.Request.SignUpRequestDto;
 import com.infosys.ParkEasy.entity.User;
 import com.infosys.ParkEasy.entity.type.RoleType;
+import com.infosys.ParkEasy.entity.type.UserStatusType;
 import com.infosys.ParkEasy.repository.UserRepository;
 import com.infosys.ParkEasy.service.Interface.AuthService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImp implements AuthService {
@@ -30,7 +33,7 @@ public class AuthServiceImp implements AuthService {
     private final AuthenticationManager authenticationManager;
 
     private String generateCustomId() {
-        return "CUST-" + UUID.randomUUID()
+        return UUID.randomUUID()
                 .toString()
                 .substring(0, 8)
                 .toUpperCase();
@@ -50,7 +53,7 @@ public class AuthServiceImp implements AuthService {
         user.setPhone(signUpRequestDto.getPhone());
         user.setCustomId(generateCustomId());
         user.setRoleTypes(Set.of(RoleType.USER));
-
+        user.setStatusType(UserStatusType.ACTIVE);
         User savedUser = userRepository.save(user);
 
         String token = authUtil.generateTokenByEmail(savedUser);

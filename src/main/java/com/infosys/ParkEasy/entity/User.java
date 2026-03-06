@@ -1,13 +1,13 @@
 package com.infosys.ParkEasy.entity;
 
 import com.infosys.ParkEasy.entity.type.RoleType;
+import com.infosys.ParkEasy.entity.type.UserStatusType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -39,7 +39,8 @@ public class User {
 
     @Column(name = "full_name", nullable =false)
     private String name;
-
+    @Enumerated(EnumType.STRING)
+    private UserStatusType statusType;
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "user_roles",
@@ -57,7 +58,6 @@ public class User {
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
     private Set<Vehicle> vehicles =new HashSet<>();
-
 
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -2,6 +2,7 @@ package com.infosys.ParkEasy.controller;
 
 import com.infosys.ParkEasy.dto.Reponse.ChartResponseDto;
 import com.infosys.ParkEasy.dto.Reponse.DashboardStatsResponseDto;
+import com.infosys.ParkEasy.dto.Reponse.UserProfileResponseDto;
 import com.infosys.ParkEasy.entity.Parking;
 
 import com.infosys.ParkEasy.service.Interface.AdminService;
@@ -69,4 +70,11 @@ public class AdminController {
     public Long bookedSlots(){
         return adminService.bookedSlots();
     }
+
+    @GetMapping("/user/{customId}")
+    ResponseEntity<UserProfileResponseDto> getUserDetails(@PathVariable String customId){
+     return   ResponseEntity.ok(adminService.getUserDetails(customId));
+    }
+
+
 }
