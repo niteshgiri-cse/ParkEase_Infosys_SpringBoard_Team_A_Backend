@@ -5,9 +5,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.infosys.ParkEasy.entity.type.ParkingType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,7 +28,7 @@ public class Parking {
     private String address;
     private String city;
     private String phone;
-    private String pincode;
+    private String pinCode;
 
     private Double price;
 
@@ -44,17 +45,17 @@ public class Parking {
     @JsonManagedReference
     private List<Floor> floors;
 
-    @OneToOne(mappedBy = "parking", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "parking", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private NormalSlot normalSlot;
 
+    @OneToMany(mappedBy = "parking", cascade = CascadeType.ALL)
+    private List<ParkingSpot> spots;
     public void setNormalSlot(NormalSlot slot) {
         this.normalSlot = slot;
         slot.setParking(this);
     }
+    @CreationTimestamp
+    private LocalDateTime createAt;
 
-    public void addFloor(Floor floor) {
-        floors.add(floor);
-        floor.setParking(this);
-    }
 }

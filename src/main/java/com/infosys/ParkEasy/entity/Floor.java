@@ -18,11 +18,8 @@ public class Floor {
 
     private String floorName;
     private String prefix;
-    private Integer total;
-    private Integer occupied;
+    private Integer totalSpots;
     private Integer evStations;
-    private Integer evOccupied;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parking_id")
     @JsonBackReference

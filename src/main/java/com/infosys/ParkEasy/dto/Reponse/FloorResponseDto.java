@@ -6,7 +6,8 @@ import lombok.Data;
 public class FloorResponseDto {
     private String floorName;
     private String prefix;
-    private Integer total;
+    private Integer totalSpots;
     private Integer occupied;
     private Integer evStations;
+    private Integer evOccupied;
 }

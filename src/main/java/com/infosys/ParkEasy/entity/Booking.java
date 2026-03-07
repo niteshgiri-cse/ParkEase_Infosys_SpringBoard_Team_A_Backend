@@ -23,4 +23,8 @@ public class Booking {
 
     private LocalDateTime bookingTime;
 
+    @ManyToOne
+    @JoinColumn(name = "spot_id")
+    private ParkingSpot parkingSpot;
+
 }

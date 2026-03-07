@@ -17,11 +17,8 @@ public class NormalSlot {
     private Long id;
 
     private String prefix;
-    private Integer total;
-    private Integer occupied;
+    private Integer totalSlots;
     private Integer evStations;
-    private Integer evOccupied;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parking_id")
     @JsonBackReference

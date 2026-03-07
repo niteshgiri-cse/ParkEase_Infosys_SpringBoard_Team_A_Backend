@@ -1,19 +1,16 @@
 package com.infosys.ParkEasy.repository;
 
-import com.infosys.ParkEasy.entity.Parking;
+import com.infosys.ParkEasy.entity.ParkingSpot;
+import com.infosys.ParkEasy.entity.type.SlotType;
+import com.infosys.ParkEasy.entity.type.SpotStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface ParkingRepository extends JpaRepository<Parking,Long>{
+public interface ParkingSpotRepository extends JpaRepository<ParkingSpot, Long> {
 
-    // TOTAL SLOTS
-    @Query("""
-    SELECT COUNT(ps)
-    FROM ParkingSpot ps
-    """)
+    @Query("SELECT COUNT(ps) FROM ParkingSpot ps")
     Long getTotalSlots();
 
-    // AVAILABLE SLOTS
     @Query("""
     SELECT COUNT(ps)
     FROM ParkingSpot ps
@@ -21,7 +18,6 @@ public interface ParkingRepository extends JpaRepository<Parking,Long>{
     """)
     Long getAvailableSlots();
 
-    // BOOKED SLOTS
     @Query("""
     SELECT COUNT(ps)
     FROM ParkingSpot ps
@@ -29,7 +25,6 @@ public interface ParkingRepository extends JpaRepository<Parking,Long>{
     """)
     Long getBookedSlots();
 
-    // TOTAL EV STATIONS
     @Query("""
     SELECT COUNT(ps)
     FROM ParkingSpot ps
@@ -37,16 +32,6 @@ public interface ParkingRepository extends JpaRepository<Parking,Long>{
     """)
     Long getTotalEvStations();
 
-    // OCCUPIED EV STATIONS
-    @Query("""
-    SELECT COUNT(ps)
-    FROM ParkingSpot ps
-    WHERE ps.slotType = 'EV'
-    AND ps.status = 'OCCUPIED'
-    """)
-    Long getOccupiedEvStations();
-
-    // AVAILABLE EV STATIONS
     @Query("""
     SELECT COUNT(ps)
     FROM ParkingSpot ps
@@ -54,4 +39,12 @@ public interface ParkingRepository extends JpaRepository<Parking,Long>{
     AND ps.status = 'AVAILABLE'
     """)
     Long getAvailableEvStations();
+
+    @Query("""
+    SELECT COUNT(ps)
+    FROM ParkingSpot ps
+    WHERE ps.slotType = 'EV'
+    AND ps.status = 'OCCUPIED'
+    """)
+    Long getOccupiedEvStations();
 }
