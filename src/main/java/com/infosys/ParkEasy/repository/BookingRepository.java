@@ -1,6 +1,7 @@
 package com.infosys.ParkEasy.repository;
 
 import com.infosys.ParkEasy.entity.Booking;
+import com.infosys.ParkEasy.entity.ParkingSpot;
 import com.infosys.ParkEasy.entity.type.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,4 +27,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             ORDER BY year
             """, nativeQuery = true)
     List<Object[]> getYearlyBookings();
+
+    List<Booking> findByParkingSpotAndStatusAndEndTimeAfterAndStartTimeBefore(
+            ParkingSpot spot,
+            String status,
+            LocalDateTime start,
+            LocalDateTime end
+    );
 }

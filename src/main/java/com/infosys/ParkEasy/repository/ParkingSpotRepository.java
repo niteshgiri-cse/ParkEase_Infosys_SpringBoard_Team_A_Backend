@@ -6,6 +6,8 @@ import com.infosys.ParkEasy.entity.type.SpotStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface ParkingSpotRepository extends JpaRepository<ParkingSpot, Long> {
 
     @Query("SELECT COUNT(ps) FROM ParkingSpot ps")
@@ -47,4 +49,5 @@ public interface ParkingSpotRepository extends JpaRepository<ParkingSpot, Long> 
     AND ps.status = 'OCCUPIED'
     """)
     Long getOccupiedEvStations();
+    List<ParkingSpot> findByParking_IdAndSlotType(Long parkingId, SlotType slotType);
 }

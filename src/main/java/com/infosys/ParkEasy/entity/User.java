@@ -12,6 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -58,7 +59,8 @@ public class User {
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
     private Set<Vehicle> vehicles =new HashSet<>();
-
+    @OneToMany(mappedBy = "user")
+    private List<PaymentOrder> bookings;
     @CreationTimestamp
     private LocalDateTime createdAt;
 
