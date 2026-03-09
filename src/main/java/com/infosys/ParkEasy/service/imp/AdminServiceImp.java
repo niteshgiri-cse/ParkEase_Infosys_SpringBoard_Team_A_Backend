@@ -84,6 +84,11 @@ public class AdminServiceImp implements AdminService {
             Integer totalSlots = parkingRequestDto.getNormalSlots().getTotalSlots();
             Integer evSlots = parkingRequestDto.getNormalSlots().getEvStations();
 
+            // Production Safety
+            if (totalSlots == null || totalSlots <= 0) {
+                throw new RuntimeException("Total slots must be provided for NORMAL parking");
+            }
+
             if (evSlots == null) {
                 evSlots = 0;
             }
@@ -116,8 +121,13 @@ public class AdminServiceImp implements AdminService {
             for (FloorRequestDto floor : parkingRequestDto.getFloors()) {
 
                 String prefix = floor.getPrefix();
-                Integer totalSlots = floor.getTotalSlots();
+                Integer totalSlots = floor.getTotalSlots(); // FIXED
                 Integer evSlots = floor.getEvStations();
+
+                // Production Safety
+                if (totalSlots == null || totalSlots <= 0) {
+                    throw new RuntimeException("Total spots must be provided for floor: " + floor.getFloorName());
+                }
 
                 if (evSlots == null) {
                     evSlots = 0;
@@ -150,7 +160,6 @@ public class AdminServiceImp implements AdminService {
 
         return saveParking;
     }
-
 
 
     private static Parking getParking(ParkingRequestDto requestDto) {
