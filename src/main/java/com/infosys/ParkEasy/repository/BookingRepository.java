@@ -11,14 +11,35 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    long countByStatus(String status);
+    @Query(value = """
+    SELECT
+        (SELECT COUNT(*) FROM parking) AS totalLocations,
+        (SELECT COUNT(*) FROM parking_spot) AS totalSlots,
+        (SELECT COUNT(*) FROM parking_spot ps
+            WHERE ps.id NOT IN (
+                SELECT b.parking_spot_id
+                FROM booking b
+                WHERE b.start_time <= NOW()
+                AND b.end_time >= NOW()
+            )
+        ) AS availableSlots,
+        (SELECT COUNT(*)
+            FROM booking
+            WHERE start_time <= NOW()
+            AND end_time >= NOW()
+        ) AS bookedSlots,
+        (SELECT COUNT(*) FROM user) AS totalUsers,
+        (SELECT COUNT(*)
+            FROM booking
+            WHERE status='CONFIRMED'
+        ) AS totalBookings,
+        (SELECT COALESCE(SUM(amount),0)
+            FROM booking
+            WHERE status='CONFIRMED'
+        ) AS revenue
+""", nativeQuery = true)
+    List<Object[]> getDashboardStats();
 
-    @Query("SELECT COALESCE(SUM(b.amount),0) FROM Booking b WHERE b.status='BOOKED'")
-    Double getTotalRevenue();
-    @Query("SELECT COUNT(b) FROM Booking b WHERE b.status = 'CONFIRMED'")
-    long getTotalConfirmedBookings();
-
-    // Year-wise confirmed bookings
     @Query(value = """
             SELECT YEAR(booking_time) AS year, COUNT(*) AS total
             FROM booking

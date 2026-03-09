@@ -28,29 +28,24 @@ public class AdminServiceImp implements AdminService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final ParkingRepository parkingRepository;
-    private final SlotRepository slotRepository;
     private final ModelMapper modelMapper;
     private final ParkingSpotRepository parkingSpotRepository;
-
 
     @Override
     public DashboardStatsResponseDto getDashboardStats() {
 
-        long totalUsers = userRepository.count();
-        long totalBookings = bookingRepository.getTotalConfirmedBookings();
-        long totalLocations = parkingRepository.count();
-        long totalSlots = parkingRepository.getTotalSlots();
-        long bookedSlots = slotRepository.countByBookedTrue();
-        long availableSlots = slotRepository.countByBookedFalse();
-        double revenue = bookingRepository.getTotalRevenue();
+        List<Object[]> result = bookingRepository.getDashboardStats();
+
+        Object[] stats = result.getFirst();
+
         return new DashboardStatsResponseDto(
-                totalLocations,
-                totalSlots,
-                availableSlots,
-                bookedSlots,
-                totalUsers,
-                totalBookings,
-                revenue
+                ((Number) stats[0]).longValue(),
+                ((Number) stats[1]).longValue(),
+                ((Number) stats[2]).longValue(),
+                ((Number) stats[3]).longValue(),
+                ((Number) stats[4]).longValue(),
+                ((Number) stats[5]).longValue(),
+                ((Number) stats[6]).doubleValue()
         );
     }
     @Override
