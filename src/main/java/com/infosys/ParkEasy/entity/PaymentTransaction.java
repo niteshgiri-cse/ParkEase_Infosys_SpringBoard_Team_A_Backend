@@ -1,5 +1,6 @@
 package com.infosys.ParkEasy.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.infosys.ParkEasy.entity.type.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,5 +23,6 @@ public class PaymentTransaction {
 
     @ManyToOne
     @JoinColumn(name="payment_order_id")
+    @JsonIgnore
     private PaymentOrder paymentOrder;
 }

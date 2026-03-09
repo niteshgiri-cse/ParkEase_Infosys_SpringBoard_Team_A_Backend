@@ -1,5 +1,6 @@
 package com.infosys.ParkEasy.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.infosys.ParkEasy.entity.type.BookingStatus;
 import com.infosys.ParkEasy.entity.type.SlotType;
 import jakarta.persistence.*;
@@ -53,5 +54,6 @@ public class Booking {
     private SlotType slotType;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id")
+    @JsonIgnore
     private User user;
 }

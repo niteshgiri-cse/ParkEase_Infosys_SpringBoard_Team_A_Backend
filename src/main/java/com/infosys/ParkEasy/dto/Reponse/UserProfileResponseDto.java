@@ -16,7 +16,7 @@ public class UserProfileResponseDto {
     private String email;
     private String phone;
     private List<RoleType> roles = new ArrayList<>();
-    private List<Address> addresses = new ArrayList<>();
-    private List<Vehicle> vehicles = new ArrayList<>();
+    private List<AddressResponseDto> addresses = new ArrayList<>();
+    private List<VehicleResponseDto> vehicles = new ArrayList<>();
 
 }

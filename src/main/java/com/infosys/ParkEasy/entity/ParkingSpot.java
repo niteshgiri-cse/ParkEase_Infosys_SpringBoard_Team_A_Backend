@@ -1,5 +1,6 @@
 package com.infosys.ParkEasy.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.infosys.ParkEasy.entity.type.SlotType;
 import com.infosys.ParkEasy.entity.type.SpotStatus;
 import jakarta.persistence.*;
@@ -27,5 +28,6 @@ public class ParkingSpot {
 
     @ManyToOne
     @JoinColumn(name = "parking_id")
+    @JsonIgnore
     private Parking parking;
 }

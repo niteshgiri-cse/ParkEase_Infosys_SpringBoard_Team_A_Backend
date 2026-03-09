@@ -1,5 +1,6 @@
 package com.infosys.ParkEasy.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.infosys.ParkEasy.entity.type.RoleType;
 import com.infosys.ParkEasy.entity.type.UserStatusType;
 import jakarta.persistence.*;
@@ -10,7 +11,6 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,8 +40,10 @@ public class User {
 
     @Column(name = "full_name", nullable =false)
     private String name;
+
     @Enumerated(EnumType.STRING)
     private UserStatusType statusType;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "user_roles",
@@ -55,13 +57,17 @@ public class User {
     private Integer loyaltyPoints = 0;
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
-    private Set<Address> addresses=new HashSet<>();
+    @JsonIgnore
+    private Set<Address> addresses = new HashSet<>();
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
-    private Set<Vehicle> vehicles =new HashSet<>();
+    @JsonIgnore
+    private Set<Vehicle> vehicles = new HashSet<>();
+
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<PaymentOrder> bookings;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
-
 }
