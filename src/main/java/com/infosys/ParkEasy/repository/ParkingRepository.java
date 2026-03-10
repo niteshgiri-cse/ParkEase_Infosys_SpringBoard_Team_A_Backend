@@ -31,73 +31,73 @@ public interface ParkingRepository extends JpaRepository<Parking,Long>{
     WHERE ps.status = 'OCCUPIED'
     """)
     Long getBookedSlots();
-
     @Query("""
-    SELECT new com.infosys.ParkEasy.dto.Reponse.ParkingsResponseDto(
-        p.parkingName,
-        p.address,
-        COUNT(ps.id),
+SELECT new com.infosys.ParkEasy.dto.Reponse.ParkingsResponseDto(
+    p.id,
+    p.parkingName,
+    p.address,
+    COUNT(ps.id),
 
-        SUM(CASE
-            WHEN ps.id NOT IN (
-                SELECT b.parkingSpot.id
-                FROM Booking b
-                WHERE b.startTime <= CURRENT_TIMESTAMP
-                AND b.endTime >= CURRENT_TIMESTAMP
-            )
-        THEN 1 ELSE 0 END),
+    SUM(CASE
+        WHEN ps.id NOT IN (
+            SELECT b.parkingSpot.id
+            FROM Booking b
+            WHERE b.startTime <= CURRENT_TIMESTAMP
+            AND b.endTime >= CURRENT_TIMESTAMP
+        )
+    THEN 1 ELSE 0 END),
 
-        SUM(CASE WHEN ps.slotType = 'EV' THEN 1 ELSE 0 END),
+    SUM(CASE WHEN ps.slotType = 'EV' THEN 1 ELSE 0 END),
 
-        SUM(CASE
-            WHEN ps.slotType = 'EV'
-            AND ps.id NOT IN (
-                SELECT b.parkingSpot.id
-                FROM Booking b
-                WHERE b.startTime <= CURRENT_TIMESTAMP
-                AND b.endTime >= CURRENT_TIMESTAMP
-            )
-        THEN 1 ELSE 0 END)
-    )
-    FROM Parking p
-    LEFT JOIN p.spots ps
-    GROUP BY p.id
-    """)
+    SUM(CASE
+        WHEN ps.slotType = 'EV'
+        AND ps.id NOT IN (
+            SELECT b.parkingSpot.id
+            FROM Booking b
+            WHERE b.startTime <= CURRENT_TIMESTAMP
+            AND b.endTime >= CURRENT_TIMESTAMP
+        )
+    THEN 1 ELSE 0 END)
+)
+FROM Parking p
+LEFT JOIN p.spots ps
+GROUP BY p.id, p.parkingName, p.address
+""")
     List<ParkingsResponseDto> getRealtimeParkingStatus();
 
-
     @Query("""
-    SELECT new com.infosys.ParkEasy.dto.Reponse.ParkingsResponseDto(
-        p.parkingName,
-        p.address,
-        COUNT(ps.id),
+SELECT new com.infosys.ParkEasy.dto.Reponse.ParkingsResponseDto(
+    p.id,
+    p.parkingName,
+    p.address,
+    COUNT(ps.id),
 
-        SUM(CASE
-            WHEN ps.id NOT IN (
-                SELECT b.parkingSpot.id
-                FROM Booking b
-                WHERE b.startTime <= CURRENT_TIMESTAMP
-                AND b.endTime >= CURRENT_TIMESTAMP
-            )
-        THEN 1 ELSE 0 END),
+    SUM(CASE
+        WHEN ps.id NOT IN (
+            SELECT b.parkingSpot.id
+            FROM Booking b
+            WHERE b.startTime <= CURRENT_TIMESTAMP
+            AND b.endTime >= CURRENT_TIMESTAMP
+        )
+    THEN 1 ELSE 0 END),
 
-        SUM(CASE WHEN ps.slotType = 'EV' THEN 1 ELSE 0 END),
+    SUM(CASE WHEN ps.slotType = 'EV' THEN 1 ELSE 0 END),
 
-        SUM(CASE
-            WHEN ps.slotType = 'EV'
-            AND ps.id NOT IN (
-                SELECT b.parkingSpot.id
-                FROM Booking b
-                WHERE b.startTime <= CURRENT_TIMESTAMP
-                AND b.endTime >= CURRENT_TIMESTAMP
-            )
-        THEN 1 ELSE 0 END)
-    )
-    FROM Parking p
-    LEFT JOIN p.spots ps
-    WHERE p.id = :parkingId
-    GROUP BY p.id
-    """)
+    SUM(CASE
+        WHEN ps.slotType = 'EV'
+        AND ps.id NOT IN (
+            SELECT b.parkingSpot.id
+            FROM Booking b
+            WHERE b.startTime <= CURRENT_TIMESTAMP
+            AND b.endTime >= CURRENT_TIMESTAMP
+        )
+    THEN 1 ELSE 0 END)
+)
+FROM Parking p
+LEFT JOIN p.spots ps
+WHERE p.id = :parkingId
+GROUP BY p.id, p.parkingName, p.address
+""")
     ParkingsResponseDto getParkingRealtimeStatus(Long parkingId);
 
 }

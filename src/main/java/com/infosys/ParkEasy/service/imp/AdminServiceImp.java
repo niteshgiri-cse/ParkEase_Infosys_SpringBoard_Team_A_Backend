@@ -1,8 +1,6 @@
 package com.infosys.ParkEasy.service.imp;
 
-import com.infosys.ParkEasy.dto.Reponse.ChartResponseDto;
-import com.infosys.ParkEasy.dto.Reponse.DashboardStatsResponseDto;
-import com.infosys.ParkEasy.dto.Reponse.UserProfileResponseDto;
+import com.infosys.ParkEasy.dto.Reponse.*;
 import com.infosys.ParkEasy.dto.Request.FloorRequestDto;
 import com.infosys.ParkEasy.dto.Request.ParkingRequestDto;
 import com.infosys.ParkEasy.entity.*;
@@ -13,6 +11,7 @@ import com.infosys.ParkEasy.service.Interface.AdminService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -210,8 +209,8 @@ public class AdminServiceImp implements AdminService {
         parkingRepository.deleteById(id);
     }
     @Override
-    public List<Parking> getAllParkings(){
-        return parkingRepository.findAll();
+    public List<ParkingsResponseDto> getAllParkings(){
+        return parkingRepository.getRealtimeParkingStatus();
     }
     @Override
     public Parking getParkingById(Long id){
@@ -234,5 +233,85 @@ public class AdminServiceImp implements AdminService {
        User user=userRepository.findByCustomId(customId).orElseThrow(()->new UsernameNotFoundException("User Not " +
                "Exist"));
         return modelMapper.map(user,UserProfileResponseDto.class);
+    }
+
+    @Override
+    public ResponseEntity<List<AdminUserResponseDto>> getAllUserDetails() {
+
+        List<User> users = userRepository.findAll();
+
+        List<AdminUserResponseDto> response = users.stream().map(user -> {
+
+            AdminUserResponseDto dto = new AdminUserResponseDto();
+
+            dto.setCustomId(user.getCustomId());
+            dto.setName(user.getName());
+            dto.setPhone(user.getPhone());
+            dto.setUserStatusType(user.getStatusType());
+            // ---------------- VEHICLE MAPPING ----------------
+            List<VehicleResponseDto> vehicles = user.getVehicles()
+                    .stream()
+                    .map(vehicle -> {
+                        VehicleResponseDto v = new VehicleResponseDto();
+                        v.setVehicleNumber(vehicle.getVehicleNumber());
+                        v.setVehicleType(vehicle.getVehicleType());
+                        v.setBrand(vehicle.getBrand());
+                        v.setModel(vehicle.getModel());
+                        v.setColor(vehicle.getColor());
+                        return v;
+                    }).toList();
+            dto.setVehicleDetails(vehicles);
+
+            // ---------------- ADDRESS MAPPING ----------------
+            List<AddressResponseDto> addresses = user.getAddresses()
+                    .stream()
+                    .map(address -> {
+
+                        AddressResponseDto a = new AddressResponseDto();
+                        a.setAddressLine1(address.getAddressLine1());
+                        a.setAddressLine2(address.getAddressLine2());
+                        a.setCity(address.getCity());
+                        a.setState(address.getState());
+                        a.setCountry(address.getCountry());
+                        a.setPinCode(address.getPinCode());
+                        a.setAddressType(address.getAddressType());
+                        return a;
+                    }).toList();
+
+            dto.setAddress(addresses);
+
+            // ---------------- BOOKING----------------
+            if (user.getBookings() != null && !user.getBookings().isEmpty()) {
+                dto.setTotalBooking(String.valueOf(user.getBookings().size()));
+                PaymentOrder paymentOrder =
+                        user.getBookings().get(user.getBookings().size() - 1);
+                Booking lastBooking = paymentOrder.getBooking();
+
+                if (lastBooking != null) {
+                    BookingResponseDto bookingDto = BookingResponseDto.builder()
+
+                            .bookingId(lastBooking.getBookingId())
+                            .name(lastBooking.getName())
+                            .phone(lastBooking.getPhone())
+                            .vehicleNumber(lastBooking.getVehicleNumber())
+                            .amount(lastBooking.getAmount())
+                            .parkingId(lastBooking.getParkingId())
+                            .startTime(lastBooking.getStartTime())
+                            .endTime(lastBooking.getEndTime())
+                            .evStation(lastBooking.isEvStation())
+                            .paymentId(lastBooking.getPaymentId())
+                            .receiptId(lastBooking.getReceiptId())
+                            .status(lastBooking.getStatus())
+                            .createdAt(lastBooking.getCreatedAt())
+                            .spotNumber(lastBooking.getSpotNumber())
+                            .floorName(lastBooking.getFloorName())
+                            .slotType(lastBooking.getSlotType())
+                            .build();
+                    dto.setLastBooking(bookingDto);
+                }
+            }
+            return dto;
+        }).toList();
+        return ResponseEntity.ok(response);
     }
 }

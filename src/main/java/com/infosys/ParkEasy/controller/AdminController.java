@@ -1,8 +1,6 @@
 package com.infosys.ParkEasy.controller;
 
-import com.infosys.ParkEasy.dto.Reponse.ChartResponseDto;
-import com.infosys.ParkEasy.dto.Reponse.DashboardStatsResponseDto;
-import com.infosys.ParkEasy.dto.Reponse.UserProfileResponseDto;
+import com.infosys.ParkEasy.dto.Reponse.*;
 import com.infosys.ParkEasy.dto.Request.ParkingRequestDto;
 import com.infosys.ParkEasy.entity.Parking;
 
@@ -52,7 +50,7 @@ public class AdminController {
     }
 
     @GetMapping("/parking")
-    public List<Parking> getAll(){
+    public List<ParkingsResponseDto> getAll(){
         return adminService.getAllParkings();
     }
 
@@ -61,19 +59,14 @@ public class AdminController {
         return adminService.getParkingById(id);
     }
 
-    @GetMapping("/total-slots")
-    public Long totalSlots(){
-        return adminService.totalSlots();
-    }
-
-    @GetMapping("/dashboard/available-slots")
-    public Long availableSlots(){
-        return adminService.availableSlots();
-    }
-
     @GetMapping("/dashboard/booked-slots")
     public Long bookedSlots(){
         return adminService.bookedSlots();
+    }
+
+    @GetMapping("/allUserDetails")
+    public ResponseEntity<List<AdminUserResponseDto>> getAllUserDetails(){
+       return adminService.getAllUserDetails();
     }
 
     @GetMapping("/user/{customId}")

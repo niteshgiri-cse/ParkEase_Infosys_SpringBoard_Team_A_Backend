@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ParkingsResponseDto {
-
+    private Long id;
     private String parkingName;
     private String parkingAddress;
     private Long totalSlot;
