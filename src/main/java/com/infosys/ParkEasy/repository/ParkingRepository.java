@@ -4,10 +4,11 @@ import com.infosys.ParkEasy.dto.Reponse.ParkingsResponseDto;
 import com.infosys.ParkEasy.entity.Parking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ParkingRepository extends JpaRepository<Parking,Long>{
+public interface ParkingRepository extends JpaRepository<Parking, Long> {
 
     // TOTAL SLOTS
     @Query("""
@@ -15,6 +16,7 @@ public interface ParkingRepository extends JpaRepository<Parking,Long>{
     FROM ParkingSpot ps
     """)
     Long getTotalSlots();
+
 
     // AVAILABLE SLOTS
     @Query("""
@@ -24,6 +26,7 @@ public interface ParkingRepository extends JpaRepository<Parking,Long>{
     """)
     Long getAvailableSlots();
 
+
     // BOOKED SLOTS
     @Query("""
     SELECT COUNT(ps)
@@ -31,11 +34,15 @@ public interface ParkingRepository extends JpaRepository<Parking,Long>{
     WHERE ps.status = 'OCCUPIED'
     """)
     Long getBookedSlots();
+
+
+    // REALTIME PARKING STATUS
     @Query("""
 SELECT new com.infosys.ParkEasy.dto.Reponse.ParkingsResponseDto(
     p.id,
     p.parkingName,
     p.address,
+
     COUNT(ps.id),
 
     SUM(CASE
@@ -57,19 +64,26 @@ SELECT new com.infosys.ParkEasy.dto.Reponse.ParkingsResponseDto(
             WHERE b.startTime <= CURRENT_TIMESTAMP
             AND b.endTime >= CURRENT_TIMESTAMP
         )
-    THEN 1 ELSE 0 END)
+    THEN 1 ELSE 0 END),
+
+    p.price,
+    p.evPrice
 )
 FROM Parking p
 LEFT JOIN p.spots ps
-GROUP BY p.id, p.parkingName, p.address
+GROUP BY p.id, p.parkingName, p.address, p.price, p.evPrice
 """)
     List<ParkingsResponseDto> getRealtimeParkingStatus();
 
+
+
+    // SINGLE PARKING REALTIME STATUS
     @Query("""
 SELECT new com.infosys.ParkEasy.dto.Reponse.ParkingsResponseDto(
     p.id,
     p.parkingName,
     p.address,
+
     COUNT(ps.id),
 
     SUM(CASE
@@ -91,13 +105,16 @@ SELECT new com.infosys.ParkEasy.dto.Reponse.ParkingsResponseDto(
             WHERE b.startTime <= CURRENT_TIMESTAMP
             AND b.endTime >= CURRENT_TIMESTAMP
         )
-    THEN 1 ELSE 0 END)
+    THEN 1 ELSE 0 END),
+
+    p.price,
+    p.evPrice
 )
 FROM Parking p
 LEFT JOIN p.spots ps
 WHERE p.id = :parkingId
-GROUP BY p.id, p.parkingName, p.address
+GROUP BY p.id, p.parkingName, p.address, p.price, p.evPrice
 """)
-    ParkingsResponseDto getParkingRealtimeStatus(Long parkingId);
+    ParkingsResponseDto getParkingRealtimeStatus(@Param("parkingId") Long parkingId);
 
 }

@@ -14,4 +14,6 @@ public class ParkingsResponseDto {
     private Long availableSlot;
     private Long evStation;
     private Long evAvailable;
+    private Double parkingPrice;
+    private Double evPrice;
 }
