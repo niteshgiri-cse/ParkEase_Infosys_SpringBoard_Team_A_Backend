@@ -23,7 +23,7 @@ public class AdminController {
     private final AdminService adminService;
 
 
-    @GetMapping("/stats")
+    @GetMapping("/dashboardStats")
     public ResponseEntity<DashboardStatsResponseDto> getDashboardStats() {
         return ResponseEntity.ok(adminService.getDashboardStats());
     }
@@ -49,7 +49,7 @@ public class AdminController {
         adminService.deleteParking(id);
     }
 
-    @GetMapping("/parking")
+    @GetMapping("/parkings")
     public List<ParkingsResponseDto> getAll(){
         return adminService.getAllParkings();
     }
@@ -59,10 +59,6 @@ public class AdminController {
         return adminService.getParkingById(id);
     }
 
-    @GetMapping("/dashboard/booked-slots")
-    public Long bookedSlots(){
-        return adminService.bookedSlots();
-    }
 
     @GetMapping("/allUserDetails")
     public ResponseEntity<List<AdminUserResponseDto>> getAllUserDetails(){

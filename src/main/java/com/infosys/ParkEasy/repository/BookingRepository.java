@@ -55,4 +55,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             LocalDateTime start,
             LocalDateTime end
     );
+
+    List<Booking> findByUserId(Long id);
 }
