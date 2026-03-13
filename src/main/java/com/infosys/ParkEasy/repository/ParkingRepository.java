@@ -10,32 +10,6 @@ import java.util.List;
 
 public interface ParkingRepository extends JpaRepository<Parking, Long> {
 
-    // TOTAL SLOTS
-    @Query("""
-    SELECT COUNT(ps)
-    FROM ParkingSpot ps
-    """)
-    Long getTotalSlots();
-
-
-    // AVAILABLE SLOTS
-    @Query("""
-    SELECT COUNT(ps)
-    FROM ParkingSpot ps
-    WHERE ps.status = 'AVAILABLE'
-    """)
-    Long getAvailableSlots();
-
-
-    // BOOKED SLOTS
-    @Query("""
-    SELECT COUNT(ps)
-    FROM ParkingSpot ps
-    WHERE ps.status = 'OCCUPIED'
-    """)
-    Long getBookedSlots();
-
-
     // REALTIME PARKING STATUS
     @Query("""
 SELECT new com.infosys.ParkEasy.dto.Reponse.ParkingsResponseDto(

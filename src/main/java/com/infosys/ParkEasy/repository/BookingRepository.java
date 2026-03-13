@@ -80,4 +80,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     );
 
     List<Booking> findByUserId(Long id);
+
+    @Query("SELECT b FROM Booking b WHERE DATE(b.createdAt)=CURRENT_DATE")
+    List<Booking> findTodayBookings();
 }

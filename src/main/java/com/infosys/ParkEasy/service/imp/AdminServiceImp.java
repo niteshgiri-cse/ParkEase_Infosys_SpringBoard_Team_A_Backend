@@ -51,8 +51,7 @@ public class AdminServiceImp implements AdminService {
     //Register parking
     @Override
     @Transactional
-    public Parking registerParking(ParkingRequestDto dto){
-
+    public ParkingsResponseDto registerParking(ParkingRequestDto dto){
         Parking parking=new Parking();
         parking.setParkingName(dto.getParkingName());
         parking.setAddress(dto.getAddress());
@@ -78,12 +77,14 @@ public class AdminServiceImp implements AdminService {
                 throw new RuntimeException("Total slots required");
             }
 
-            if(evSlots==null)evSlots=0;
+            if(evSlots==null){
+                evSlots=0;
+            }
 
             for(int i=1;i<=totalSlots;i++){
                 ParkingSpot spot=new ParkingSpot();
                 spot.setStatus(SpotStatus.AVAILABLE);
-                spot.setParking(parking);
+                spot.setParking(savedParking);
 
                 if(i<=evSlots){
                     spot.setSlotType(SlotType.EV);
@@ -92,14 +93,12 @@ public class AdminServiceImp implements AdminService {
                     spot.setSlotType(SlotType.NORMAL);
                     spot.setSpotNumber(prefix+i);
                 }
-
                 spots.add(spot);
             }
         }
 
         if(dto.getFloors()!=null&&!dto.getFloors().isEmpty()){
             for(FloorRequestDto floor:dto.getFloors()){
-
                 String prefix=floor.getPrefix();
                 Integer totalSlots=floor.getTotalSlots();
                 Integer evSlots=floor.getEvStations();
@@ -108,12 +107,14 @@ public class AdminServiceImp implements AdminService {
                     throw new RuntimeException("Total slots required");
                 }
 
-                if(evSlots==null)evSlots=0;
+                if(evSlots==null){
+                    evSlots=0;
+                }
 
                 for(int i=1;i<=totalSlots;i++){
                     ParkingSpot spot=new ParkingSpot();
                     spot.setStatus(SpotStatus.AVAILABLE);
-                    spot.setParking(parking);
+                    spot.setParking(savedParking);
                     spot.setFloorName(floor.getFloorName());
 
                     if(i<=evSlots){
@@ -123,14 +124,35 @@ public class AdminServiceImp implements AdminService {
                         spot.setSlotType(SlotType.NORMAL);
                         spot.setSpotNumber(prefix+i);
                     }
-
                     spots.add(spot);
                 }
             }
         }
 
         parkingSpotRepository.saveAll(spots);
-        return savedParking;
+
+        long totalSlots=spots.size();
+        long availableSlots=spots.stream()
+                .filter(s->s.getStatus()==SpotStatus.AVAILABLE)
+                .count();
+
+        long evStations=spots.stream()
+                .filter(s->s.getSlotType()==SlotType.EV)
+                .count();
+
+        long evAvailable=spots.stream()
+                .filter(s->s.getSlotType()==SlotType.EV&&s.getStatus()==SpotStatus.AVAILABLE)
+                .count();
+
+        ParkingsResponseDto response=modelMapper.map(savedParking,ParkingsResponseDto.class);
+        response.setParkingAddress(savedParking.getAddress());
+        response.setParkingPrice(savedParking.getPrice());
+        response.setTotalSlot(totalSlots);
+        response.setAvailableSlot(availableSlots);
+        response.setEvStation(evStations);
+        response.setEvAvailable(evAvailable);
+
+        return response;
     }
 
     //Update parking
@@ -170,59 +192,73 @@ public class AdminServiceImp implements AdminService {
 
     //User profile
     @Override
-    public UserProfileResponseDto getUserDetails(String customId){
+    public UserReportResponseDto getUserDetails(String customId){
+
         User user=userRepository.findByCustomId(customId)
                 .orElseThrow(()->new UsernameNotFoundException("User Not Exist"));
-        return modelMapper.map(user,UserProfileResponseDto.class);
-    }
+        UserReportResponseDto dto=new UserReportResponseDto();
+        dto.setCustomId(user.getCustomId());
+        dto.setName(user.getName());
+        dto.setPhone(user.getPhone());
+        dto.setEmail(user.getEmail());
+        dto.setJoinedDate(user.getCreatedAt().toLocalDate());
+        if(!user.getAddresses().isEmpty()){
+            Address address=user.getAddresses().iterator().next();
+            dto.setAddress(modelMapper.map(address,AddressResponseDto.class));
+        }
+        if(!user.getVehicles().isEmpty()){
+            dto.setVehicle(user.getVehicles().iterator().next().getVehicleNumber());
+        }
+        List<UserBookingReportRowDto> history=user.getBookings().stream()
+                .map(p->{
 
+                    Booking b=p.getBooking();
+                    UserBookingReportRowDto row=new UserBookingReportRowDto();
+                    row.setUser(user.getName());
+                    row.setParking(b.getParkingId());
+                    row.setCar(b.getVehicleNumber());
+                    row.setAmount(p.getAmount());
+                    row.setDate(b.getCreatedAt());
+                    return row;
+                }).toList();
+        dto.setBookingHistory(history);
+        dto.setTotalBookings(history.size());
+        double total=history.stream()
+                .mapToDouble(UserBookingReportRowDto::getAmount)
+                .sum();
+        dto.setTotalSpent(total);
+        return dto;
+    }
     //Admin user list
     @Override
-    public ResponseEntity<List<AdminUserResponseDto>> getAllUserDetails(){
+    public ResponseEntity<List<ManageUserResponseDto>> getAllUserDetails() {
 
-        List<User> users=userRepository.findAll();
+        List<User> users = userRepository.findAll();
+        List<ManageUserResponseDto> response = users.stream().map(user -> {
 
-        List<AdminUserResponseDto> response=users.stream().map(user->{
-
-            AdminUserResponseDto dto=new AdminUserResponseDto();
+            ManageUserResponseDto dto = new ManageUserResponseDto();
             dto.setCustomId(user.getCustomId());
             dto.setName(user.getName());
             dto.setPhone(user.getPhone());
             dto.setUserStatusType(user.getStatusType());
-
-            List<VehicleResponseDto> vehicles=user.getVehicles().stream().map(v->{
-                VehicleResponseDto vr=new VehicleResponseDto();
-                vr.setVehicleNumber(v.getVehicleNumber());
-                vr.setVehicleType(v.getVehicleType());
-                vr.setBrand(v.getBrand());
-                vr.setModel(v.getModel());
-                vr.setColor(v.getColor());
-                return vr;
-            }).toList();
-
-            dto.setVehicleDetails(vehicles);
-
-            List<AddressResponseDto> addresses=user.getAddresses().stream().map(a->{
-                AddressResponseDto ar=new AddressResponseDto();
-                ar.setAddressLine1(a.getAddressLine1());
-                ar.setAddressLine2(a.getAddressLine2());
-                ar.setCity(a.getCity());
-                ar.setState(a.getState());
-                ar.setCountry(a.getCountry());
-                ar.setPinCode(a.getPinCode());
-                ar.setAddressType(a.getAddressType());
-                return ar;
-            }).toList();
-
-            dto.setAddress(addresses);
-
+            dto.setVehicle(
+                    user.getVehicles()
+                            .stream()
+                            .findFirst()
+                            .map(Vehicle::getVehicleNumber)
+                            .orElse(null)
+            );
+            dto.setCityName(
+                    user.getAddresses()
+                            .stream()
+                            .findFirst()
+                            .map(Address::getCity)
+                            .orElse(null)
+            );
             return dto;
-
         }).toList();
-
         return ResponseEntity.ok(response);
     }
-
     //Dashboard charts
     @Override
     public DashboardResponse dashboard(){
@@ -295,5 +331,22 @@ public class AdminServiceImp implements AdminService {
                 .weeklyUsers((int)weeklyUsers)
                 .monthlyUsers((int)monthlyUsers)
                 .build();
+    }
+    @Override
+    public List<ParkingBookingResponseDto> getTodayBookings(){
+
+        List<Booking> bookings=bookingRepository.findTodayBookings();
+        return bookings.stream().map(b->{
+            ParkingBookingResponseDto dto=new ParkingBookingResponseDto();
+            dto.setCustomId(b.getUser().getCustomId());
+            dto.setUser(b.getUser().getName());
+            dto.setParking(b.getParkingId());
+            dto.setSlot(b.getSpotNumber());
+            dto.setCar(b.getVehicleNumber());
+            dto.setAmount(b.getAmount());
+            dto.setStatus(b.getStatus());
+            dto.setDate(b.getCreatedAt());
+            return dto;
+        }).toList();
     }
 }

@@ -20,9 +20,9 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<UserProfileResponseDto> getUserProfile(){
-       return ResponseEntity.ok( userService.getUserProfile());
+       return ResponseEntity.ok( userService.getProfile());
     }
-    @GetMapping("/bookings")
+    @GetMapping("/booking-history")
     public ResponseEntity<List<BookingResponseDto>> getAllBooking(){
         return ResponseEntity.ok(userService.getAllBooking());
     }

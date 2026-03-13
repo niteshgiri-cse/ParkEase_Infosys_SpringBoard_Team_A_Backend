@@ -7,7 +7,8 @@ import com.infosys.ParkEasy.dto.Reponse.UserProfileResponseDto;
 import java.util.List;
 
 public interface UserService {
-    UserProfileResponseDto getUserProfile();
+
+    UserProfileResponseDto getProfile();
 
     List<BookingResponseDto> getAllBooking();
 

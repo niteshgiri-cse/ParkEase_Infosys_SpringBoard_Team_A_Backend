@@ -16,35 +16,48 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class VehicleServiceImp implements VehicleService {
+
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
     @Override
-    public VehicleResponseDto registerVehicle(VehicleRequestDto vehicleRequestDto) {
-       String email=SecurityContextHolder.getContext().getAuthentication().getName();
-       User user=userRepository.findByEmail(email).orElseThrow(()->new UsernameNotFoundException("User Not found"));
+    public VehicleResponseDto registerVehicle(VehicleRequestDto dto){
+        String email=SecurityContextHolder.getContext().getAuthentication().getName();
+        User user=userRepository.findByEmail(email)
+                .orElseThrow(()->new UsernameNotFoundException("User Not found"));
+
+        vehicleRepository.findByUser(user)
+                .ifPresent(v->{throw new RuntimeException("Vehicle already registered");});
+
+        if(vehicleRepository.existsByVehicleNumber(dto.getVehicleNumber()))
+            throw new RuntimeException("Vehicle number already exists");
+
         Vehicle vehicle=Vehicle.builder()
-                .vehicleNumber(vehicleRequestDto.getVehicleNumber())
-                .vehicleType(vehicleRequestDto.getVehicleType())
-                .brand(vehicleRequestDto.getBrand())
-                .model(vehicleRequestDto.getModel())
+                .vehicleNumber(dto.getVehicleNumber())
+                .vehicleType(dto.getVehicleType())
+                .brand(dto.getBrand())
+                .model(dto.getModel())
+                .color(dto.getColor())
                 .user(user)
-                .color(vehicleRequestDto.getColor())
                 .build();
-        Vehicle saveVehicle=vehicleRepository.save(vehicle);
-        return modelMapper.map(saveVehicle, VehicleResponseDto.class);
+
+        Vehicle saved=vehicleRepository.save(vehicle);
+        return modelMapper.map(saved,VehicleResponseDto.class);
     }
 
     @Override
-    public void deleteVehicle(Long vehicleId) {
+    public void deleteVehicle(Long vehicleId){
         String email=SecurityContextHolder.getContext().getAuthentication().getName();
-        User user=userRepository.findByEmail(email).orElseThrow(()->new UsernameNotFoundException("User Not found"));
-        Vehicle existVehicle=vehicleRepository.findById(vehicleId).orElseThrow(()-> new RuntimeException("Vehicle not" +
-                " " +
-                "found"));
-        if(!user.getId().equals(existVehicle.getUser().getId())) throw new RuntimeException("Unauthorized access");
-        vehicleRepository.delete(existVehicle);
+        User user=userRepository.findByEmail(email)
+                .orElseThrow(()->new UsernameNotFoundException("User Not found"));
 
+        Vehicle vehicle=vehicleRepository.findById(vehicleId)
+                .orElseThrow(()->new RuntimeException("Vehicle not found"));
+
+        if(!vehicle.getUser().getId().equals(user.getId()))
+            throw new RuntimeException("Unauthorized access");
+
+        vehicleRepository.delete(vehicle);
     }
 }

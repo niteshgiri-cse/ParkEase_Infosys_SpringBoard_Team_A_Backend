@@ -22,28 +22,32 @@ public class AddressServiceImp implements AddressService {
     private final AddressRepository addressRepository;
     private final UserRepository userRepository;
     @Override
-    public AddressResponseDto createAddress(AddressRequestDto addressRequestDto) {
-    String email= SecurityContextHolder.getContext().getAuthentication().getName();
-    User user=userRepository.findByEmail(email).orElseThrow(()->new UsernameNotFoundException("User not found"));
-        long addressCount = addressRepository.countByUserId(user.getId());
+    public AddressResponseDto createAddress(AddressRequestDto dto){
 
-        if(addressCount >= 2){
-            throw new RuntimeException("User can store maximum 2 addresses");
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        if(user.getAddresses()!=null && !user.getAddresses().isEmpty()){
+            throw new IllegalStateException("Address already exists");
         }
-        Address address=Address.builder()
-                .addressLine1(addressRequestDto.getAddressLine1())
-                .addressLine2(addressRequestDto.getAddressLine2())
-                .city(addressRequestDto.getCity())
-                .country(addressRequestDto.getCountry())
-                .state(addressRequestDto.getState())
-                .pinCode(addressRequestDto.getPinCode())
-                .addressType(addressRequestDto.getAddressType())
+        Address address = Address.builder()
+                .addressLine(dto.getAddressLine())
+                .city(dto.getCity())
+                .state(dto.getState())
+                .country(dto.getCountry())
+                .pinCode(dto.getPinCode())
+                .addressType(dto.getAddressType())
                 .user(user)
                 .build();
-        Address save=addressRepository.save(address);
-        return modelMapper.map(save, AddressResponseDto.class);
-    }
 
+        Address saved = addressRepository.save(address);
+        if(user.getAddresses()!=null){
+            user.getAddresses().add(saved);
+        }
+        return modelMapper.map(saved, AddressResponseDto.class);
+    }
     @Override
     public List<AddressResponseDto> getUserAddresses() {
 
@@ -60,16 +64,29 @@ public class AddressServiceImp implements AddressService {
     }
 
     @Override
-    public AddressResponseDto updateAddress(Long addressId, AddressRequestDto addressRequestDto) {
-        String email=SecurityContextHolder.getContext().getAuthentication().getName();
-        User user=userRepository.findByEmail(email).orElseThrow(()->new UsernameNotFoundException("User not found"));
-        Address existAddress=addressRepository.findById(addressId).orElseThrow(()->new RuntimeException("Address " +
-                "not " +
-                "found"));
-        if(!existAddress.getUser().getId().equals(user.getId()))  throw new RuntimeException("Unauthorized access");
-        modelMapper.map(addressRequestDto,existAddress);
-        Address save=addressRepository.save(existAddress);
-        return modelMapper.map(save, AddressResponseDto.class);
+    public AddressResponseDto updateAddress(Long addressId, AddressRequestDto dto){
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address not found"));
+
+        if(!address.getUser().getId().equals(user.getId()))
+            throw new RuntimeException("Unauthorized access");
+
+        address.setAddressLine(dto.getAddressLine());
+        address.setCity(dto.getCity());
+        address.setState(dto.getState());
+        address.setCountry(dto.getCountry());
+        address.setPinCode(dto.getPinCode());
+        address.setAddressType(dto.getAddressType());
+
+        Address saved = addressRepository.save(address);
+
+        return modelMapper.map(saved, AddressResponseDto.class);
     }
 
     @Override

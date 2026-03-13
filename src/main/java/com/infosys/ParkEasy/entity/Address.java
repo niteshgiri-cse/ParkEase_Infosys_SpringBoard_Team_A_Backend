@@ -14,15 +14,14 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class Address {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotEmpty(message = "address is required")
-    @Column(nullable = false)
-    private String addressLine1;
-
-    private String addressLine2;
+    @Column( nullable = false)
+    private String addressLine;
 
     @NotBlank(message = "City is required")
     @Column(nullable = false)
@@ -39,13 +38,12 @@ public class Address {
     @NotEmpty(message = "pinCode is required")
     @Column(nullable = false)
     private String pinCode;
+
     @Enumerated(EnumType.STRING)
     private AddressType addressType;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;
-
-
-
 }

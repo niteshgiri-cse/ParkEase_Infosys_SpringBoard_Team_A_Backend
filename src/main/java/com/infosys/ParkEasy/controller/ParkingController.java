@@ -17,8 +17,8 @@ import java.util.List;
 public class ParkingController {
     private final ParkingService parkingService;
 
-    @GetMapping
-    public ResponseEntity<List<ParkingsResponseDto>> getParkings(){
+    @GetMapping("/all-parking")
+    public ResponseEntity<List<ParkingsResponseDto>> getAllParkings(){
           return  parkingService.getParkings();
     }
 

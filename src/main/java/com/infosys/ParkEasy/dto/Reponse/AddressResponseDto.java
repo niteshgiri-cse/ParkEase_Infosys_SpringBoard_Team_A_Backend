@@ -9,8 +9,7 @@ import lombok.Data;
 public class AddressResponseDto {
 
     private Long id;
-    private String addressLine1;
-    private String addressLine2;
+    private String addressLine;
     private String city;
     private String state;
     private String country;

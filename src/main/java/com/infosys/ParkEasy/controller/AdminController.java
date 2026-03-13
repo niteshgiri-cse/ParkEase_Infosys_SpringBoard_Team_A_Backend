@@ -6,7 +6,6 @@ import com.infosys.ParkEasy.entity.Parking;
 
 import com.infosys.ParkEasy.service.Interface.AdminService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,8 +32,8 @@ public class AdminController {
     }
 
     @PostMapping("/parking")
-    public ResponseEntity<Parking> registerParking(@RequestBody ParkingRequestDto parkingRequestDto){
-        Parking saveParking=adminService.registerParking(parkingRequestDto);
+    public ResponseEntity<ParkingsResponseDto> registerParking(@RequestBody ParkingRequestDto parkingRequestDto){
+        ParkingsResponseDto saveParking=adminService.registerParking(parkingRequestDto);
        return ResponseEntity.status(HttpStatus.CREATED).body(saveParking);
     }
 
@@ -58,16 +57,19 @@ public class AdminController {
         return adminService.getParkingById(id);
     }
 
-
     @GetMapping("/allUserDetails")
-    public ResponseEntity<List<AdminUserResponseDto>> getAllUserDetails(){
+    public ResponseEntity<List<ManageUserResponseDto>> getAllUserDetails(){
        return adminService.getAllUserDetails();
     }
 
     @GetMapping("/user/{customId}")
-    ResponseEntity<UserProfileResponseDto> getUserDetails(@PathVariable String customId){
+    ResponseEntity<UserReportResponseDto> getUserDetails(@PathVariable String customId){
      return   ResponseEntity.ok(adminService.getUserDetails(customId));
     }
 
+    @GetMapping("/bookings/today")
+    public ResponseEntity<List<ParkingBookingResponseDto>> getTodayBookings(){
+        return ResponseEntity.ok(adminService.getTodayBookings());
+    }
 
 }

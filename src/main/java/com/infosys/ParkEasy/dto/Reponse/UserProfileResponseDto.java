@@ -1,22 +1,25 @@
 package com.infosys.ParkEasy.dto.Reponse;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.infosys.ParkEasy.entity.Address;
-import com.infosys.ParkEasy.entity.Vehicle;
+import com.infosys.ParkEasy.dto.Reponse.AddressResponseDto;
+import com.infosys.ParkEasy.dto.Reponse.VehicleResponseDto;
 import com.infosys.ParkEasy.entity.type.RoleType;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+
 @Data
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UserProfileResponseDto {
+
     private String customId;
     private String name;
     private String email;
     private String phone;
-    private List<RoleType> roles = new ArrayList<>();
-    private List<AddressResponseDto> addresses = new ArrayList<>();
-    private List<VehicleResponseDto> vehicles = new ArrayList<>();
 
+    private List<RoleType> roles = new ArrayList<>();
+
+    private AddressResponseDto addresses;
+    private VehicleResponseDto vehicles;
 }

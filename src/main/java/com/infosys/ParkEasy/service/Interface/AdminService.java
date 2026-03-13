@@ -10,12 +10,13 @@ import java.util.List;
 public interface AdminService {
 
     DashboardStatsResponseDto getDashboardStats();
-     Parking registerParking(ParkingRequestDto requestDto);
+    ParkingsResponseDto registerParking(ParkingRequestDto requestDto);
     Parking updateParking(Long id,Parking parking);
     void deleteParking(Long id);
     List<ParkingsResponseDto>getAllParkings();
     Parking getParkingById(Long id);
-    UserProfileResponseDto getUserDetails(String customId);
-    ResponseEntity<List<AdminUserResponseDto>> getAllUserDetails();
+    UserReportResponseDto getUserDetails(String customId);
+    ResponseEntity<List<ManageUserResponseDto>> getAllUserDetails();
     DashboardResponse dashboard();
+    List<ParkingBookingResponseDto> getTodayBookings();
 }

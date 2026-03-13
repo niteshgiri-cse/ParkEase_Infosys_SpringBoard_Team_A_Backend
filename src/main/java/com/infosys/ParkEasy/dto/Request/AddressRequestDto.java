@@ -8,10 +8,7 @@ import lombok.Data;
 @Data
 public class AddressRequestDto {
     @NotEmpty(message = "address is required")
-    private String addressLine1;
-
-    private String addressLine2;
-
+    private String addressLine;
     @NotBlank(message = "City is required")
     private String city;
 
