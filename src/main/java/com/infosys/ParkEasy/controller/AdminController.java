@@ -27,10 +27,9 @@ public class AdminController {
     public ResponseEntity<DashboardStatsResponseDto> getDashboardStats() {
         return ResponseEntity.ok(adminService.getDashboardStats());
     }
-
-    @GetMapping("/bookings")
-    public ChartResponseDto getBookingChart() {
-        return adminService.getBookingChart();
+    @GetMapping("/getDashboard")
+    public ResponseEntity<DashboardResponse> dashboard(){
+        return ResponseEntity.ok(adminService.dashboard());
     }
 
     @PostMapping("/parking")

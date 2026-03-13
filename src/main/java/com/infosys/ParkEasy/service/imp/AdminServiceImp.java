@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,122 +28,100 @@ public class AdminServiceImp implements AdminService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final ParkingRepository parkingRepository;
-    private final ModelMapper modelMapper;
     private final ParkingSpotRepository parkingSpotRepository;
+    private final PaymentOrderRepository paymentOrderRepository;
+    private final ModelMapper modelMapper;
 
+    //Dashboard cards
     @Override
-    public DashboardStatsResponseDto getDashboardStats() {
-
-        List<Object[]> result = bookingRepository.getDashboardStats();
-
-        Object[] stats = result.getFirst();
-
+    public DashboardStatsResponseDto getDashboardStats(){
+        List<Object[]> result=bookingRepository.getDashboardStats();
+        Object[] stats=result.get(0);
         return new DashboardStatsResponseDto(
-                ((Number) stats[0]).longValue(),
-                ((Number) stats[1]).longValue(),
-                ((Number) stats[2]).longValue(),
-                ((Number) stats[3]).longValue(),
-                ((Number) stats[4]).longValue(),
-                ((Number) stats[5]).longValue(),
-                ((Number) stats[6]).doubleValue()
+                ((Number)stats[0]).longValue(),
+                ((Number)stats[1]).longValue(),
+                ((Number)stats[2]).longValue(),
+                ((Number)stats[3]).longValue(),
+                ((Number)stats[4]).longValue(),
+                ((Number)stats[5]).longValue(),
+                ((Number)stats[6]).doubleValue()
         );
     }
-    @Override
-    public ChartResponseDto getBookingChart() {
-        List<Object[]> result = bookingRepository.getYearlyBookings();
-        List<String> years = result.stream()
-                .map(r -> String.valueOf(r[0]))
-                .toList();
-        List<Integer> data = result.stream()
-                .map(r -> ((Number) r[1]).intValue())
-                .toList();
-        ChartResponseDto.Series series =
-                new ChartResponseDto.Series("Actual Bookings", data);
-        return new ChartResponseDto(List.of(series), years);
-    }
 
+    //Register parking
     @Override
     @Transactional
-    public Parking registerParking(ParkingRequestDto parkingRequestDto) {
+    public Parking registerParking(ParkingRequestDto dto){
 
-        Parking parking = getParking(parkingRequestDto);
-        Parking saveParking = parkingRepository.save(parking);
+        Parking parking=new Parking();
+        parking.setParkingName(dto.getParkingName());
+        parking.setAddress(dto.getAddress());
+        parking.setCity(dto.getCity());
+        parking.setPhone(dto.getPhone());
+        parking.setPinCode(dto.getPinCode());
+        parking.setPrice(dto.getPrice());
+        parking.setOpenTime(dto.getOpenTime());
+        parking.setCloseTime(dto.getCloseTime());
+        parking.setEvEnabled(dto.getEvEnabled());
+        parking.setEvPrice(dto.getEvPrice());
+        parking.setParkingType(dto.getParkingType());
 
-        List<ParkingSpot> spots = new ArrayList<>();
+        Parking savedParking=parkingRepository.save(parking);
+        List<ParkingSpot> spots=new ArrayList<>();
 
-        // -------- NORMAL PARKING (NO FLOOR) --------
+        if(dto.getNormalSlots()!=null){
+            String prefix=dto.getNormalSlots().getPrefix();
+            Integer totalSlots=dto.getNormalSlots().getTotalSlots();
+            Integer evSlots=dto.getNormalSlots().getEvStations();
 
-        if (parkingRequestDto.getNormalSlots() != null) {
-
-            String prefix = parkingRequestDto.getNormalSlots().getPrefix();
-            Integer totalSlots = parkingRequestDto.getNormalSlots().getTotalSlots();
-            Integer evSlots = parkingRequestDto.getNormalSlots().getEvStations();
-
-            // Production Safety
-            if (totalSlots == null || totalSlots <= 0) {
-                throw new RuntimeException("Total slots must be provided for NORMAL parking");
+            if(totalSlots==null||totalSlots<=0){
+                throw new RuntimeException("Total slots required");
             }
 
-            if (evSlots == null) {
-                evSlots = 0;
-            }
+            if(evSlots==null)evSlots=0;
 
-            for (int i = 1; i <= totalSlots; i++) {
-
-                ParkingSpot spot = new ParkingSpot();
+            for(int i=1;i<=totalSlots;i++){
+                ParkingSpot spot=new ParkingSpot();
                 spot.setStatus(SpotStatus.AVAILABLE);
                 spot.setParking(parking);
 
-                // EV SLOT
-                if (i <= evSlots) {
+                if(i<=evSlots){
                     spot.setSlotType(SlotType.EV);
-                    spot.setSpotNumber(prefix + i + "-EV");
-                }
-                // NORMAL SLOT
-                else {
+                    spot.setSpotNumber(prefix+i+"-EV");
+                }else{
                     spot.setSlotType(SlotType.NORMAL);
-                    spot.setSpotNumber(prefix + i);
+                    spot.setSpotNumber(prefix+i);
                 }
 
                 spots.add(spot);
             }
         }
 
-        // -------- FLOOR WISE PARKING --------
+        if(dto.getFloors()!=null&&!dto.getFloors().isEmpty()){
+            for(FloorRequestDto floor:dto.getFloors()){
 
-        if (parkingRequestDto.getFloors() != null && !parkingRequestDto.getFloors().isEmpty()) {
+                String prefix=floor.getPrefix();
+                Integer totalSlots=floor.getTotalSlots();
+                Integer evSlots=floor.getEvStations();
 
-            for (FloorRequestDto floor : parkingRequestDto.getFloors()) {
-
-                String prefix = floor.getPrefix();
-                Integer totalSlots = floor.getTotalSlots(); // FIXED
-                Integer evSlots = floor.getEvStations();
-
-                // Production Safety
-                if (totalSlots == null || totalSlots <= 0) {
-                    throw new RuntimeException("Total spots must be provided for floor: " + floor.getFloorName());
+                if(totalSlots==null||totalSlots<=0){
+                    throw new RuntimeException("Total slots required");
                 }
 
-                if (evSlots == null) {
-                    evSlots = 0;
-                }
+                if(evSlots==null)evSlots=0;
 
-                for (int i = 1; i <= totalSlots; i++) {
-
-                    ParkingSpot spot = new ParkingSpot();
+                for(int i=1;i<=totalSlots;i++){
+                    ParkingSpot spot=new ParkingSpot();
                     spot.setStatus(SpotStatus.AVAILABLE);
                     spot.setParking(parking);
                     spot.setFloorName(floor.getFloorName());
 
-                    // EV SLOT
-                    if (i <= evSlots) {
+                    if(i<=evSlots){
                         spot.setSlotType(SlotType.EV);
-                        spot.setSpotNumber(prefix + i + "-EV");
-                    }
-                    // NORMAL SLOT
-                    else {
+                        spot.setSpotNumber(prefix+i+"-EV");
+                    }else{
                         spot.setSlotType(SlotType.NORMAL);
-                        spot.setSpotNumber(prefix + i);
+                        spot.setSpotNumber(prefix+i);
                     }
 
                     spots.add(spot);
@@ -151,31 +130,14 @@ public class AdminServiceImp implements AdminService {
         }
 
         parkingSpotRepository.saveAll(spots);
-
-        return saveParking;
+        return savedParking;
     }
 
-
-    private static Parking getParking(ParkingRequestDto requestDto) {
-        Parking parking = new Parking();
-
-        parking.setParkingName(requestDto.getParkingName());
-        parking.setAddress(requestDto.getAddress());
-        parking.setCity(requestDto.getCity());
-        parking.setPhone(requestDto.getPhone());
-        parking.setPinCode(requestDto.getPinCode());
-        parking.setPrice(requestDto.getPrice());
-        parking.setOpenTime(requestDto.getOpenTime());
-        parking.setCloseTime(requestDto.getCloseTime());
-        parking.setEvEnabled(requestDto.getEvEnabled());
-        parking.setEvPrice(requestDto.getEvPrice());
-        parking.setParkingType(requestDto.getParkingType());
-        return parking;
-    }
-
+    //Update parking
     @Override
     public Parking updateParking(Long id,Parking parking){
         Parking existing=parkingRepository.findById(id).orElseThrow();
+
         existing.setParkingName(parking.getParkingName());
         existing.setAddress(parking.getAddress());
         existing.setCity(parking.getCity());
@@ -188,130 +150,150 @@ public class AdminServiceImp implements AdminService {
         existing.setEvPrice(parking.getEvPrice());
         existing.setParkingType(parking.getParkingType());
 
-        existing.getFloors().clear();
-        if(parking.getFloors()!=null){
-            for(Floor f:parking.getFloors()){
-                f.setParking(existing);
-                existing.getFloors().add(f);
-            }
-        }
-
-        NormalSlot slot=parking.getNormalSlot();
-        if(slot!=null){
-            slot.setParking(existing);
-            existing.setNormalSlot(slot);
-        }
-
         return parkingRepository.save(existing);
     }
+
     @Override
     public void deleteParking(Long id){
         parkingRepository.deleteById(id);
     }
+
     @Override
     public List<ParkingsResponseDto> getAllParkings(){
         return parkingRepository.getRealtimeParkingStatus();
     }
+
     @Override
     public Parking getParkingById(Long id){
         return parkingRepository.findById(id).orElseThrow();
     }
+
+    //User profile
     @Override
-    public Long totalSlots(){
-        return parkingRepository.getTotalSlots();
-    }
-    @Override
-    public Long availableSlots(){
-        return parkingRepository.getAvailableSlots();
-    }
-    @Override
-    public Long bookedSlots(){
-        return parkingRepository.getBookedSlots();
-    }
-    @Override
-    public UserProfileResponseDto getUserDetails(String customId) {
-       User user=userRepository.findByCustomId(customId).orElseThrow(()->new UsernameNotFoundException("User Not " +
-               "Exist"));
+    public UserProfileResponseDto getUserDetails(String customId){
+        User user=userRepository.findByCustomId(customId)
+                .orElseThrow(()->new UsernameNotFoundException("User Not Exist"));
         return modelMapper.map(user,UserProfileResponseDto.class);
     }
 
+    //Admin user list
     @Override
-    public ResponseEntity<List<AdminUserResponseDto>> getAllUserDetails() {
+    public ResponseEntity<List<AdminUserResponseDto>> getAllUserDetails(){
 
-        List<User> users = userRepository.findAll();
+        List<User> users=userRepository.findAll();
 
-        List<AdminUserResponseDto> response = users.stream().map(user -> {
+        List<AdminUserResponseDto> response=users.stream().map(user->{
 
-            AdminUserResponseDto dto = new AdminUserResponseDto();
-
+            AdminUserResponseDto dto=new AdminUserResponseDto();
             dto.setCustomId(user.getCustomId());
             dto.setName(user.getName());
             dto.setPhone(user.getPhone());
             dto.setUserStatusType(user.getStatusType());
-            // ---------------- VEHICLE MAPPING ----------------
-            List<VehicleResponseDto> vehicles = user.getVehicles()
-                    .stream()
-                    .map(vehicle -> {
-                        VehicleResponseDto v = new VehicleResponseDto();
-                        v.setVehicleNumber(vehicle.getVehicleNumber());
-                        v.setVehicleType(vehicle.getVehicleType());
-                        v.setBrand(vehicle.getBrand());
-                        v.setModel(vehicle.getModel());
-                        v.setColor(vehicle.getColor());
-                        return v;
-                    }).toList();
+
+            List<VehicleResponseDto> vehicles=user.getVehicles().stream().map(v->{
+                VehicleResponseDto vr=new VehicleResponseDto();
+                vr.setVehicleNumber(v.getVehicleNumber());
+                vr.setVehicleType(v.getVehicleType());
+                vr.setBrand(v.getBrand());
+                vr.setModel(v.getModel());
+                vr.setColor(v.getColor());
+                return vr;
+            }).toList();
+
             dto.setVehicleDetails(vehicles);
 
-            // ---------------- ADDRESS MAPPING ----------------
-            List<AddressResponseDto> addresses = user.getAddresses()
-                    .stream()
-                    .map(address -> {
-
-                        AddressResponseDto a = new AddressResponseDto();
-                        a.setAddressLine1(address.getAddressLine1());
-                        a.setAddressLine2(address.getAddressLine2());
-                        a.setCity(address.getCity());
-                        a.setState(address.getState());
-                        a.setCountry(address.getCountry());
-                        a.setPinCode(address.getPinCode());
-                        a.setAddressType(address.getAddressType());
-                        return a;
-                    }).toList();
+            List<AddressResponseDto> addresses=user.getAddresses().stream().map(a->{
+                AddressResponseDto ar=new AddressResponseDto();
+                ar.setAddressLine1(a.getAddressLine1());
+                ar.setAddressLine2(a.getAddressLine2());
+                ar.setCity(a.getCity());
+                ar.setState(a.getState());
+                ar.setCountry(a.getCountry());
+                ar.setPinCode(a.getPinCode());
+                ar.setAddressType(a.getAddressType());
+                return ar;
+            }).toList();
 
             dto.setAddress(addresses);
 
-            // ---------------- BOOKING----------------
-            if (user.getBookings() != null && !user.getBookings().isEmpty()) {
-                dto.setTotalBooking(String.valueOf(user.getBookings().size()));
-                PaymentOrder paymentOrder =
-                        user.getBookings().get(user.getBookings().size() - 1);
-                Booking lastBooking = paymentOrder.getBooking();
-
-                if (lastBooking != null) {
-                    BookingResponseDto bookingDto = BookingResponseDto.builder()
-
-                            .bookingId(lastBooking.getBookingId())
-                            .name(lastBooking.getName())
-                            .phone(lastBooking.getPhone())
-                            .vehicleNumber(lastBooking.getVehicleNumber())
-                            .amount(lastBooking.getAmount())
-                            .parkingId(lastBooking.getParkingId())
-                            .startTime(lastBooking.getStartTime())
-                            .endTime(lastBooking.getEndTime())
-                            .evStation(lastBooking.isEvStation())
-                            .paymentId(lastBooking.getPaymentId())
-                            .receiptId(lastBooking.getReceiptId())
-                            .status(lastBooking.getStatus())
-                            .createdAt(lastBooking.getCreatedAt())
-                            .spotNumber(lastBooking.getSpotNumber())
-                            .floorName(lastBooking.getFloorName())
-                            .slotType(lastBooking.getSlotType())
-                            .build();
-                    dto.setLastBooking(bookingDto);
-                }
-            }
             return dto;
+
         }).toList();
+
         return ResponseEntity.ok(response);
+    }
+
+    //Dashboard charts
+    @Override
+    public DashboardResponse dashboard(){
+
+        List<Object[]> bookingData = bookingRepository.monthlyBookings();
+
+        List<Integer> bookings = new ArrayList<>();
+        List<String> months = new ArrayList<>();
+
+        for(Object[] row : bookingData){
+            months.add(String.valueOf(row[0]));
+            bookings.add(((Number)row[1]).intValue());
+        }
+
+
+        List<Object[]> hourlyData = bookingRepository.hourlyBookings();
+
+        List<Integer> hourlyBookings = new ArrayList<>();
+        List<String> hours = new ArrayList<>();
+
+        for(Object[] row : hourlyData){
+
+            int hour = ((Number)row[0]).intValue();
+
+            String label;
+            if(hour == 0) label = "12AM";
+            else if(hour < 12) label = hour + "AM";
+            else if(hour == 12) label = "12PM";
+            else label = (hour - 12) + "PM";
+
+            hours.add(label);
+            hourlyBookings.add(((Number)row[1]).intValue());
+        }
+
+
+        List<Object[]> parkingData = bookingRepository.parkingBookings();
+
+        List<Integer> locationBookings = new ArrayList<>();
+        List<String> locations = new ArrayList<>();
+
+        for(Object[] row : parkingData){
+            locations.add("Parking " + row[0]);
+            locationBookings.add(((Number)row[1]).intValue());
+        }
+
+
+        List<Object[]> revenueData = paymentOrderRepository.monthlyRevenue();
+
+        List<Double> revenue = new ArrayList<>();
+
+        for(Object[] row : revenueData){
+            revenue.add(((Number)row[1]).doubleValue());
+        }
+
+
+        long dailyUsers = userRepository.countByCreatedAtAfter(LocalDateTime.now().minusDays(1));
+        long weeklyUsers = userRepository.countByCreatedAtAfter(LocalDateTime.now().minusWeeks(1));
+        long monthlyUsers = userRepository.countByCreatedAtAfter(LocalDateTime.now().minusMonths(1));
+
+
+        return DashboardResponse.builder()
+                .months(months)
+                .monthlyBookings(bookings)
+                .hours(hours)
+                .hourlyBookings(hourlyBookings)
+                .locations(locations)
+                .locationBookings(locationBookings)
+                .monthlyRevenue(revenue)
+                .dailyUsers((int)dailyUsers)
+                .weeklyUsers((int)weeklyUsers)
+                .monthlyUsers((int)monthlyUsers)
+                .build();
     }
 }

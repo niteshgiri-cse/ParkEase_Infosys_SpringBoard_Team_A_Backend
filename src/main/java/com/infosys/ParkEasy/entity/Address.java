@@ -39,7 +39,7 @@ public class Address {
     @NotEmpty(message = "pinCode is required")
     @Column(nullable = false)
     private String pinCode;
-
+    @Enumerated(EnumType.STRING)
     private AddressType addressType;
     @ManyToOne
     @JoinColumn(name = "user_id")

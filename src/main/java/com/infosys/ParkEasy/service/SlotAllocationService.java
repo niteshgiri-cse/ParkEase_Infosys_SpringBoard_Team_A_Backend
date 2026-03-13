@@ -36,7 +36,7 @@ public class SlotAllocationService {
                     bookingRepository
                             .findByParkingSpotAndStatusAndEndTimeAfterAndStartTimeBefore(
                                     spot,
-                                    BookingStatus.CONFIRMED.name(),
+                                    BookingStatus.valueOf(BookingStatus.CONFIRMED.name()),
                                     booking.getStartTime(),
                                     booking.getEndTime()
                             );

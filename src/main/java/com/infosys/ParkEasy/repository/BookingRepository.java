@@ -11,47 +11,70 @@ import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    // Monthly bookings
     @Query(value = """
-    SELECT
-        (SELECT COUNT(*) FROM parking) AS totalLocations,
-        (SELECT COUNT(*) FROM parking_spot) AS totalSlots,
-        (SELECT COUNT(*) FROM parking_spot ps
-            WHERE ps.id NOT IN (
-                SELECT b.parking_spot_id
-                FROM booking b
-                WHERE b.start_time <= NOW()
-                AND b.end_time >= NOW()
+            SELECT DATE_FORMAT(created_at,'%b') AS month, COUNT(*) AS total
+            FROM booking
+            GROUP BY YEAR(created_at), MONTH(created_at), DATE_FORMAT(created_at,'%b')
+            ORDER BY YEAR(created_at), MONTH(created_at)
+            """, nativeQuery = true)
+    List<Object[]> monthlyBookings();
+
+
+    // Hourly bookings
+    @Query(value = """
+            SELECT HOUR(start_time) AS hour, COUNT(*) AS total
+            FROM booking
+            GROUP BY HOUR(start_time)
+            ORDER BY HOUR(start_time)
+            """, nativeQuery = true)
+    List<Object[]> hourlyBookings();
+
+
+    // Parking wise bookings
+    @Query(value = """
+            SELECT parking_id, COUNT(*) AS total
+            FROM booking
+            GROUP BY parking_id
+            ORDER BY parking_id
+            """, nativeQuery = true)
+    List<Object[]> parkingBookings();
+
+
+    // Dashboard stats
+    @Query(value = """
+        SELECT
+            (SELECT COUNT(*) FROM parking),
+            (SELECT COUNT(*) FROM parking_spot),
+            (SELECT COUNT(*) FROM parking_spot ps
+                WHERE ps.id NOT IN (
+                    SELECT b.parking_spot_id
+                    FROM booking b
+                    WHERE b.start_time <= NOW()
+                    AND b.end_time >= NOW()
+                )
+            ),
+            (SELECT COUNT(*)
+                FROM booking
+                WHERE start_time <= NOW()
+                AND end_time >= NOW()
+            ),
+            (SELECT COUNT(*) FROM `user`),
+            (SELECT COUNT(*)
+                FROM booking
+                WHERE status = 'CONFIRMED'
+            ),
+            (SELECT COALESCE(SUM(amount),0)
+                FROM booking
+                WHERE status = 'CONFIRMED'
             )
-        ) AS availableSlots,
-        (SELECT COUNT(*)
-            FROM booking
-            WHERE start_time <= NOW()
-            AND end_time >= NOW()
-        ) AS bookedSlots,
-        (SELECT COUNT(*) FROM user) AS totalUsers,
-        (SELECT COUNT(*)
-            FROM booking
-            WHERE status='CONFIRMED'
-        ) AS totalBookings,
-        (SELECT COALESCE(SUM(amount),0)
-            FROM booking
-            WHERE status='CONFIRMED'
-        ) AS revenue
-""", nativeQuery = true)
+        """, nativeQuery = true)
     List<Object[]> getDashboardStats();
 
-    @Query(value = """
-            SELECT YEAR(booking_time) AS year, COUNT(*) AS total
-            FROM booking
-            WHERE status = 'CONFIRMED'
-            GROUP BY YEAR(booking_time)
-            ORDER BY year
-            """, nativeQuery = true)
-    List<Object[]> getYearlyBookings();
 
     List<Booking> findByParkingSpotAndStatusAndEndTimeAfterAndStartTimeBefore(
             ParkingSpot spot,
-            String status,
+            BookingStatus status,
             LocalDateTime start,
             LocalDateTime end
     );
