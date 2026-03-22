@@ -19,4 +19,6 @@ public interface AdminService {
     ResponseEntity<List<ManageUserResponseDto>> getAllUserDetails();
     DashboardResponse dashboard();
     List<ParkingBookingResponseDto> getTodayBookings();
+
+    AdminProfileResponseDto getProfile();
 }

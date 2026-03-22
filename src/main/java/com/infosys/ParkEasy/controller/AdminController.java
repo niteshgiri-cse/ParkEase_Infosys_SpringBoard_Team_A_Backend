@@ -71,5 +71,9 @@ public class AdminController {
     public ResponseEntity<List<ParkingBookingResponseDto>> getTodayBookings(){
         return ResponseEntity.ok(adminService.getTodayBookings());
     }
+    @GetMapping("/profile")
+    public ResponseEntity<AdminProfileResponseDto> getProfile(){
+       return ResponseEntity.ok(adminService.getProfile());
+    }
 
 }

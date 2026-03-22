@@ -349,4 +349,32 @@ public class AdminServiceImp implements AdminService {
             return dto;
         }).toList();
     }
+    
+    @Override
+    public AdminProfileResponseDto getProfile() {
+
+        String email = org.springframework.security.core.context.SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
+
+        AdminProfileResponseDto dto = new AdminProfileResponseDto();
+        dto.setCustomId(user.getCustomId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setLastLogin(user.getLastLogin());
+        dto.setRoles(new ArrayList<>(user.getRoleTypes()));
+
+        if (user.getAddresses() != null && !user.getAddresses().isEmpty()) {
+            Address address = user.getAddresses().iterator().next();
+            dto.setAddresses(modelMapper.map(address, AddressResponseDto.class));
+        }
+
+        return dto;
+    }
 }

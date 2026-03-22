@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -45,10 +44,7 @@ public class User {
     private UserStatusType statusType;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id")
-    )
+    @CollectionTable(name = "user_roles",joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Set<RoleType> roleTypes = new HashSet<>();
@@ -70,4 +66,6 @@ public class User {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    private LocalDateTime lastLogin;
 }

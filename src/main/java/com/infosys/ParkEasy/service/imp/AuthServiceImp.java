@@ -76,6 +76,8 @@ public class AuthServiceImp implements AuthService {
         String email = authentication.getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setLastLogin(java.time.LocalDateTime.now());
+        userRepository.save(user);
         String token = authUtil.generateTokenByEmail(user);
         return new LoginResponseDto(
                 user.getId(),

@@ -1,6 +1,5 @@
 package com.infosys.ParkEasy.dto.Request;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -10,13 +9,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class SignUpRequestDto {
-    @Column(nullable = false)
+
     @NotBlank(message = "Full name is required")
     private String name;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
-    @Column(nullable = false, unique = true)
     private String email;
 
     private String phone;
