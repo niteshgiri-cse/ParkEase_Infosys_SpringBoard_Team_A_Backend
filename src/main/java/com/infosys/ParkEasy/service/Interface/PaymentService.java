@@ -6,5 +6,5 @@ import com.razorpay.RazorpayException;
 public interface PaymentService {
     String createPaymentOrder(BookingRequestDto bookingRequestDto) throws RazorpayException;
 
-    void verifyPayment(String orderId,String paymentId) throws RazorpayException;
+    void verifyPayment(String orderId,String paymentId) throws Exception;
 }

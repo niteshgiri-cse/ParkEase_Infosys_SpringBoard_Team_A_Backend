@@ -44,6 +44,8 @@ public class Booking {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+    @Column(columnDefinition = "TEXT")
+    private String qrCode;
     @ManyToOne
     @JoinColumn(name = "parking_spot_id")
     private ParkingSpot parkingSpot;

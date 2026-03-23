@@ -1,5 +1,6 @@
 package com.infosys.ParkEasy.service.imp;
 
+import com.infosys.ParkEasy.Util.QRCodeGenerator;
 import com.infosys.ParkEasy.dto.Request.BookingRequestDto;
 import com.infosys.ParkEasy.entity.*;
 import com.infosys.ParkEasy.entity.type.BookingStatus;
@@ -97,7 +98,7 @@ public class PaymentServiceImp implements PaymentService {
 
     @Override
     @Transactional
-    public void verifyPayment(String orderId,String paymentId) throws RazorpayException {
+    public void verifyPayment(String orderId,String paymentId) throws Exception {
 
         PaymentOrder order = paymentOrderRepository
                 .findByOrderId(orderId)
@@ -117,7 +118,6 @@ public class PaymentServiceImp implements PaymentService {
         if("captured".equals(status)){
 
             order.setStatus(PaymentStatus.SUCCESS);
-
             // SLOT ALLOCATION
             ParkingSpot spot = slotAllocationService.allocateSlot(
                     booking.getParkingId(),
@@ -134,7 +134,18 @@ public class PaymentServiceImp implements PaymentService {
             booking.setStatus(BookingStatus.CONFIRMED);
             booking.setPaymentId(paymentId);
             booking.setReceiptId(order.getReceipt());
-
+            String qrData = String.format(
+                    "{\"name\":\"%s\",\"vehicle\":\"%s\",\"phone\":\"%s\",\"paymentId\":\"%s\",\"status\":\"%s\",\"spot\":\"%s\",\"floor\":\"%s\"}",
+                    booking.getName(),
+                    booking.getVehicleNumber(),
+                    booking.getPhone(),
+                    booking.getPaymentId(),
+                    booking.getStatus(),
+                    booking.getSpotNumber(),
+                    booking.getFloorName()
+            );
+            String qrCodeBase64 = QRCodeGenerator.generateQRCode(qrData);
+            booking.setQrCode(qrCodeBase64);
             // SAVE BOOKING
             bookingRepository.save(booking);
             transaction.setStatus(PaymentStatus.SUCCESS);

@@ -20,7 +20,7 @@ public class PaymentController {
     }
 
     @PostMapping("/verify")
-    public String verify(@RequestParam String orderId, @RequestParam String paymentId) throws RazorpayException {
+    public String verify(@RequestParam String orderId, @RequestParam String paymentId) throws Exception {
         paymentService.verifyPayment(orderId,paymentId);
         return "Payment Verified";
     }
